@@ -1,5 +1,5 @@
 import os
-os.system(" terraform output > li_p.txt")
+os.system("terraform output > li_p.txt")
 f = open("li_p.txt", "r")
 li = []
 for x in f:
@@ -24,9 +24,7 @@ vaf.close()
 os.system("terraform -chdir=./api-runner/ init")
 for i in li_:
     vf = open("api-runner/api.tfvars","w")
-    vf.write(f'''
-    {x}
-    orgproj = "{i}"
-    ''')
+    vf.write(f'''orgproject = "{i}"
+    {x}''')
     vf.close()
     os.system(f'terraform -chdir=./api-runner/ apply -auto-approve -var-file="api.tfvars"')
