@@ -46,7 +46,10 @@ resource "google_bigquery_data_transfer_config" "query_config_2"{
       data_source_id         = "scheduled_query"
       schedule               = "5 of month 00:00"
       params = {
-        query = "DECLARE unused STRING; DECLARE current_month_date DATE DEFAULT DATE_SUB(@run_date, INTERVAL 1 MONTH); DECLARE cost_data_invoice_month NUMERIC DEFAULT EXTRACT(MONTH FROM current_month_date); DECLARE cost_data_invoice_year NUMERIC DEFAULT EXTRACT(YEAR FROM current_month_date); EXPORT DATA OPTIONS ( uri = CONCAT('gs://${var.new_bucket_name}/', CAST(cost_data_invoice_year AS STRING), '-', CAS(current_month_date AS STRING FORMAT('MM')), '_backfill/*.csv'), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.dataset_id}` as B WHERE B.invoice.month = CONCAT(CAST(cost_data_invoice_year AS STRING), CAST(current_month_date AS STRING FORMAT('MM'))) AND B.cost != 0.0"
+        query = [18:35] Tamizharasan L
+ "DECLARE unused STRING; DECLARE current_month_date DATE DEFAULT DATE_SUB(@run_date, INTERVAL 1 MONTH); DECLARE cost_data_invoice_month NUMERIC DEFAULT EXTRACT(MONTH FROM current_month_date); DECLARE cost_data_invoice_year NUMERIC DEFAULT EXTRACT(YEAR FROM current_month_date); EXPORT DATA OPTIONS ( uri = CONCAT('gs://${var.new_bucket_name}/', CAST(cost_data_invoice_year AS STRING), '-', CAST(current_month_date AS STRING FORMAT('MM')), '_backfill/*.csv'), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.dataset_id}` as B WHERE B.invoice.month = CONCAT(CAST(cost_data_invoice_year AS STRING), CAST(current_month_date AS STRING FORMAT('MM'))) AND B.cost != 0.0"
+
+
       }
     }
 
