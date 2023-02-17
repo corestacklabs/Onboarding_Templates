@@ -13,10 +13,16 @@ resource "google_service_account" "service_account" {
   project = var.project_id
 }
 
+resource "google_project_iam_custom_role" "my_custom_proj_role" {
+  role_id     = var.role_id
+  project     = var.project_id 
+  title       = "Corestack-gcp-custom-role-test"
+  description = "Custom role for the corestack gcp module"
+  permissions = ["storage.objects.list", "storage.objects.get", "storage.buckets.list", "storage.buckets.get", "compute.regions.get", "compute.regions.list", "compute.zones.get", "compute.zones.list", "resourcemanager.projects.get", "resourcemanager.projects.list"]
+}
 resource "google_project_iam_binding" "role-binding" {
-  for_each = var.role
   project = var.project_id
-  role    = "roles/${each.value}"
+  role    = "projects/${var.project_id}/roles/${google_project_iam_custom_role.my_custom_proj_role.role_id}"
   members = ["serviceAccount:${google_service_account.service_account.email}"]
 }
 

@@ -2,9 +2,8 @@ variable "project_id" {
   type = string
   description = "List of projects on which the service is going to be enabled"
 }
-variable "role" {
-  type = set(string)
-  default = ["viewer"]
+variable "custom_role_name" {
+  type = string
   description = "All the roles that have to be assigned. Please do include viewer role atleast"
 }
 variable "account_id" {

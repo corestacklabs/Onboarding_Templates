@@ -4,7 +4,7 @@ account_id = ""
 
 display_name = ""
 
-role = ["viewer", ""]
+custom_role_name = ""
 
 new_bucket_name = ""
 
