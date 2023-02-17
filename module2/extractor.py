@@ -28,3 +28,4 @@ for i in li_:
     {x}''')
     vf.close()
     os.system(f'terraform -chdir=./api-runner/ apply -auto-approve -var-file="api.tfvars"')
+    os.system("rm -rf ./api-runner/terraform.stat*")
