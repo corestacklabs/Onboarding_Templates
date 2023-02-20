@@ -13,7 +13,7 @@ terraform {
 
 #data collector 
 data "google_projects" "my-org-projects" {
-  filter = "parent.id:${org_id}"
+  filter = "parent.id:${var.org_id}"
 }
 
 # resource for making a custom role from the set of permission
