@@ -21,6 +21,7 @@ resource "google_project_iam_custom_role" "my-custom-role" {
 resource "google_project_iam_member" "binding_role" {
   for_each = var.assign_role
   role   = each.value == null ? "projects/${var.project_id}/roles/${var.role_id}" : "roles/${each.value}"
+  project = var.project_id
   member = "serviceAccount:${var.service_account_email}"
   depends_on = [
     google_project_iam_custom_role.my-custom-role
