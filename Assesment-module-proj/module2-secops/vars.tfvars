@@ -1,4 +1,4 @@
-org_id = ""
+assign_role = [ "viewer" ]
 
 project_id = ""
 

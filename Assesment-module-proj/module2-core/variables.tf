@@ -8,7 +8,7 @@ variable "project_id" {
 }
 
 variable "assign_role" {
-  type = list(string)
+  type = set(string)
   description = "Assign Role"
   default = ["viewer"]
   nullable = true
@@ -17,17 +17,6 @@ variable "assign_role" {
 variable "role_id" {
   type = string
   description = "Role ID"
-}
-variable "assment_permisson" {
-  type = set(string)
-  description = "All the permisssion for Assesment"
-  default = [""]
-}
-
-variable "assmentgovpermisson" {
-  type = set(string)
-  description = "All permission for Assesment + Governace"
-  default = [""]
 }
 variable "api" {
     type = set(string)

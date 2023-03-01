@@ -1,5 +1,4 @@
-org_id = ""
-
+assign_role = [ "viewer" ]
 project_id = ""
 
 service_account_email = ""
