@@ -17,6 +17,7 @@ variable "assign_role" {
 variable "role_id" {
   type = string
   description = "Role ID"
+  nullable = true
 }
 
 variable "api" {
