@@ -10,6 +10,6 @@ new_bucket_name = ""
 
 bucket_location = ""
 
-dataset_id = ""
+table_id = ""
 
-dataset_location = ""
+

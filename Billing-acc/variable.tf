@@ -24,12 +24,8 @@ variable "bucket_location" {
   description = "Location in which the bucket is hosted"
 }
 
-variable "dataset_location" {
-  type = string
-  description = "Dataset hosted location"
-}
 
-variable "dataset_id" {
+variable "table_id" {
   type = string
   description = "Table ID"
 }
