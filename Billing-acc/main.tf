@@ -6,19 +6,21 @@ terraform {
     }
   }
 }
-
+locals {
+  bucket_name = "corestack-${var.project_id}"
+}
 resource "google_service_account" "service_account" {
-  account_id   = var.account_id
-  display_name = var.display_name
+  account_id   = "corestack-auth"
+  display_name = "corestack-auth"
   project = var.project_id
 }
 
 resource "google_project_iam_custom_role" "my_custom_proj_role" {
-  role_id     = var.role_id
+  role_id     = "corestack-auth-role"
   project     = var.project_id 
   title       = "Corestack-gcp-custom-role-test"
   description = "Custom role for the corestack gcp module"
-  permissions = ["storage.objects.list", "storage.objects.get", "storage.buckets.list", "storage.buckets.get", "compute.regions.get", "compute.regions.list", "compute.zones.get", "compute.zones.list", "resourcemanager.projects.get", "resourcemanager.projects.list"]
+  permissions = ["storage.objects.list", "storage.objects.get", "storage.buckets.list", "storage.buckets.get", "compute.regions.get", "compute.regions.list", "compute.zones.get", "compute.zones.list", "resourcemanager.projects.get"]
 }
 resource "google_project_iam_binding" "role-binding" {
   project = var.project_id
@@ -27,7 +29,7 @@ resource "google_project_iam_binding" "role-binding" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name          = var.new_bucket_name
+  name          = local.bucket_name
   location      = var.bucket_location
   project =  var.project_id
 }
