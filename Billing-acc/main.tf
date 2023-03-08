@@ -36,7 +36,7 @@ resource "google_storage_bucket" "bucket" {
 
 # Resource for Query1
 resource "google_bigquery_data_transfer_config" "query_config_1"{
-      display_name           = "corestack-daily-query"
+      display_name           = "corestack-daily-query-${var.project_id}"
       project                = var.project_id
       location               = "${var.bucket_location}"
       data_source_id         = "scheduled_query"
@@ -48,7 +48,7 @@ resource "google_bigquery_data_transfer_config" "query_config_1"{
 
 # Resource for Query2
 resource "google_bigquery_data_transfer_config" "query_config_2"{
-      display_name           = "corestack-monthly-query"
+      display_name           = "corestack-monthly-query-${var.project_id}"
       project                = var.project_id
       location               = "${var.bucket_location}"
       data_source_id         = "scheduled_query"
@@ -62,7 +62,7 @@ resource "google_bigquery_data_transfer_config" "query_config_2"{
 
 # Resource for Query3
 resource "google_bigquery_data_transfer_config" "query_config_3"{
-      display_name           = "corestack-on-demand"
+      display_name           = "corestack-on-demand-1-${var.project_id}"
       project                = var.project_id
       location               = "${var.bucket_location}"
       data_source_id         = "scheduled_query"
@@ -74,7 +74,7 @@ resource "google_bigquery_data_transfer_config" "query_config_3"{
 
 # Resource for Query4
 resource "google_bigquery_data_transfer_config" "query_config_4"{
-      display_name           = "corestack-on-demand"
+      display_name           = "corestack-on-demand-2-${var.project_id}"
       project                = var.project_id
       location               = "${var.bucket_location}"
       data_source_id         = "scheduled_query"
@@ -86,7 +86,7 @@ resource "google_bigquery_data_transfer_config" "query_config_4"{
 
 # Resource for Query5
 resource "google_bigquery_data_transfer_config" "query_config_5"{
-      display_name           = "corestack-on-demand"
+      display_name           = "corestack-on-demand-3-${var.project_id}"
       project                = var.project_id
       location               = "${var.bucket_location}"
       data_source_id         = "scheduled_query"
