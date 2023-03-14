@@ -13,7 +13,7 @@ terraform {
 
 # resource for making a custom role from the set of permission
 resource "google_project_iam_custom_role" "my-custom-role" {
-  role_id     = var.role_id == null ? "my-custom-role" : var.role_id
+  role_id     = var.role_id == null ? "mycustomrole" : var.role_id
   project = var.project_id
   title       = "Corestack-gcp-custom-role-test-project"
   description = "Custom role for the corestack gcp module"
