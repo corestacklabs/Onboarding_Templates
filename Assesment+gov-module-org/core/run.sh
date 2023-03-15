@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Please ensure you have the necessary IAM permissions .The execution of this script requires following user account permissions: "
-echo "Project Owner"
+echo "Organization Admin or Security Admin"
 read -p "Please specify yes if above pre-requisites met or specify no : " INPUT 
 
 if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
