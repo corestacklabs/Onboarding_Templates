@@ -100,6 +100,6 @@ resource "google_bigquery_data_transfer_config" "query_config_5"{
 
 resource "google_project_service" "api_proj_enabler" {
     project = var.project_id
-    for_each = map(["compute.googleapis.com","cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com", "recommender.googleapis.com"])
+    for_each = tomap(["compute.googleapis.com","cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com", "recommender.googleapis.com"])
     service = each.value
 }
