@@ -8,6 +8,7 @@ terraform {
 }
 locals {
   bucket_name = "corestack-${var.project_id}"
+  api = ["compute.googleapis.com","cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com", "recommender.googleapis.com"]
 }
 resource "google_service_account" "service_account" {
   account_id   = "corestack-auth"
@@ -95,4 +96,10 @@ resource "google_bigquery_data_transfer_config" "query_config_5"{
         query = "DECLARE unused STRING; DECLARE current_month_date DATE DEFAULT DATE_SUB(@run_date, INTERVAL 3 MONTH); DECLARE cost_data_invoice_month NUMERIC DEFAULT EXTRACT(MONTH FROM current_month_date); DECLARE cost_data_invoice_year NUMERIC DEFAULT EXTRACT(YEAR FROM current_month_date); EXPORT DATA OPTIONS ( uri = CONCAT('gs://${local.bucket_name}/', CAST(cost_data_invoice_year AS STRING), '-', CAST(current_month_date AS STRING FORMAT('MM')), '/*.csv'), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE B.invoice.month = CONCAT(CAST(cost_data_invoice_year AS STRING), CAST(current_month_date AS STRING FORMAT('MM'))) AND B.cost != 0.0"
       }     
         
+}
+
+resource "google_project_service" "api_proj_enabler" {
+    project = var.project_id
+    for_each = local.api
+    service = each.value
 }
