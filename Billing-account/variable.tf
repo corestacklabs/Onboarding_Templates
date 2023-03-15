@@ -12,3 +12,9 @@ variable "table_id" {
   type = string
   description = "Table ID"
 }
+
+variable "api" {
+  type = set(string)
+  description = "API to enable"
+  default = ["compute.googleapis.com","cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com", "recommender.googleapis.com"]
+}
