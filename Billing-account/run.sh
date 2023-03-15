@@ -15,7 +15,7 @@ if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
 elif [ "${INPUT}" == "Yes" ]||[ "${INPUT}" == "yes" ] ; then   
 terraform init
 bq query --display_name=auth-bq --location=$bucketloc --project_id=$projectid --batch --use_legacy_sql=false --schedule='None' "DECLARE"
-cat <<EOF >> ./vars.tfvars
+cat <<EOF > ./vars.tfvars
 project_id = "$projectid"
 bucket_location = "$bucketloc"
 table_id = "$tableid"
