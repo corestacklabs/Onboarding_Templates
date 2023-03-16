@@ -10,7 +10,7 @@ variable "project_id" {
 variable "assign_role" {
   type = set(string)
   description = "Assign Role"
-  default = ["viewer",""]
+  default = ["viewer"]
   nullable = true
 }
 

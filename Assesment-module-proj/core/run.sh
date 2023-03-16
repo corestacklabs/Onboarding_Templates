@@ -9,7 +9,7 @@ if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
 elif [ "${INPUT}" == "Yes" ]||[ "${INPUT}" == "yes" ] ; then   
 read -p "Please enter the project id: " proj_id
 read -p "Please enter the service account email: " svcacc
-read -p "Assign predefined role? specify yes or no: " role
+read -p "Assign predefined role?(roles/viewer) specify yes or no: " role
   if [ "${role}" == "No" ] || [ "${role}" == "no" ] ; then
   read -p "Creating custom role, provide the name: " roleid
   cat <<EOF > ./vars.tfvars
@@ -18,7 +18,7 @@ service_account_email = "$svcacc"
 role_id = "$roleid"
 EOF
   elif [ "${role}" == "Yes" ]||[ "${role}" == "yes" ] ; then
-  echo "granting predefined roles:"
+  echo "granting predefined roles:(roles/viewer)"
   cat <<EOF > ./vars.tfvars
 project_id = "$proj_id"
 service_account_email = "$svcacc"
