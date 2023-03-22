@@ -13,11 +13,6 @@ variable "org_id" {
   description = "Organization ID"
 }
 
-variable "role_id" {
-  type = string
-  description = "Role ID"
-}
-
 variable "api" {
     type = set(string)
     description = "List of APIS that needs to be enabled per project"

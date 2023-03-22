@@ -7,11 +7,6 @@ variable "project_id" {
   description = "List of projects on which the service is going to be enabled"
 }
 
-variable "org_id" {
-  type = string
-  description = "Organization ID"
-}
-
 variable "api" {
     type = set(string)
     description = "List of APIS that needs to be enabled per project"

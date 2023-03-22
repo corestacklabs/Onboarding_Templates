@@ -6,20 +6,6 @@ variable "project_id" {
   type = string
   description = "List of projects on which the service is going to be enabled"
 }
-
-variable "assign_role" {
-  type = set(string)
-  description = "Assign Role"
-  default = ["viewer"]
-  nullable = true
-}
-
-variable "role_id" {
-  type = string
-  description = "Role ID"
-  nullable = true
-}
-
 variable "api" {
     type = set(string)
     description = "List of APIS that needs to be enabled per project"
