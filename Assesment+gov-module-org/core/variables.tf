@@ -8,11 +8,7 @@ variable "assign_role" {
   description = "Predefined roles"
   default = ["viewer","pubsub.admin","securitycenter.adminEditor", "monitoring.editor","logging.configWriter","compute.admin"]
 }
-variable "project_id" {
-  type = string
-  description = "List of projects on which the service is going to be enabled"
-}
- 
+
 variable "org_id" {
   type = string
   description = "Organization ID"
