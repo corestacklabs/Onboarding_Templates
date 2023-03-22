@@ -32,7 +32,7 @@ resource "google_project_iam_member" "binding_role" {
 }
 
 resource "google_project_service" "api_proj_enabler" {
-    project = project_id
+    project = var.project_id
     for_each = var.api
     service = each.value
     depends_on = [
