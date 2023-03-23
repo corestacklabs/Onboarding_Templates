@@ -3,6 +3,9 @@ echo "Please ensure you have the necessary IAM permissions .The execution of thi
 echo "Project Owner"
 if [ -f vars.tfvars ]; then
   echo vars.tfvars exists.
+  terraform init
+  terraform apply -var-file="vars.tfvars" -auto-approve
+  echo "Approved"
 else
   read -p "Please specify yes if above pre-requisites met or specify no : " INPUT
   if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
@@ -35,7 +38,8 @@ project_id = "$proj_id"
 service_account_email = "$svcacc"
 EOF
 fi
+fi
 terraform init
 terraform apply -var-file="vars.tfvars" -auto-approve
 echo "Approved"
-EOF
+fi
