@@ -9,9 +9,17 @@ if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
 elif [ "${INPUT}" == "Yes" ]||[ "${INPUT}" == "yes" ] ; then   
 read -p "Please enter the project id: " proj_id
 read -p "Please enter the service account email: " svcacc
+read -p "Do you need to retrive vunrelabilities and threat from GCP console? specify yes or no:" secops
+if [ "${secops}" == "No" ] || [ "${secops}" == "no" ] ; then
 cat <<EOF > ./vars.tfvars
 project_id = "$proj_id"
 service_account_email = "$svcacc"
+EOF
+elif [ "${secops}" == "Yes" ] || [ "${secops}" == "yes" ] ; then
+cat <<EOF > ./vars.tfvars
+project_id = "$proj_id"
+service_account_email = "$svcacc"
+permissionsec = "Yes"
 EOF
 terraform init
 terraform apply -var-file="vars.tfvars" -auto-approve

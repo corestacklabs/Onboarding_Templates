@@ -8,9 +8,18 @@ if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
 elif [ "${INPUT}" == "Yes" ]||[ "${INPUT}" == "yes" ] ; then   
 read -p "Please enter the Organisation id: " org_id
 read -p "Please enter the service account email: " svcacc
+read -p "Do you need to retrive vunrelabilities and threat from GCP console? specify yes or no:" secops
+if [ "${secops}" == "No" ] || [ "${secops}" == "no" ] ; then
 cat <<EOF > ./vars.tfvars
 org_id = "$org_id"
 service_account_email = "$svcacc"
+api = ["cloudresourcemanager.googleapis.com" ,"compute.googleapis.com", "securitycenter.googleapis.com", "orgpolicy.googleapis.com"]
+EOF
+elif [ "${secops}" == "Yes" ] || [ "${secops}" == "yes" ] ; then
+cat <<EOF > ./vars.tfvars
+org_id = "$org_id"
+service_account_email = "$svcacc"
+permissionsec = "Yes"
 api = ["cloudresourcemanager.googleapis.com" ,"compute.googleapis.com", "securitycenter.googleapis.com", "orgpolicy.googleapis.com"]
 EOF
 terraform init
