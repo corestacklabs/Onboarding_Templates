@@ -17,6 +17,7 @@ locals{
 # resource for making a custom role from the set of permission
 resource "google_project_iam_custom_role" "my-custom-role" {
   count = local.checkroleid
+  project =  var.project_id
   role_id     =  var.role_id
   title       = "custom-role-proj-core"
   description = "Custom role for the corestack gcp module A proj"
