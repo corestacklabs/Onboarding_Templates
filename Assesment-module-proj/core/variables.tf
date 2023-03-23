@@ -13,6 +13,12 @@ variable "assign_role" {
   default = ["viewer"]
   nullable = true
 }
+
+variable "role_id" {
+type = string
+default = null
+nullable = true  
+}
 variable "permissionsec" {
   type = string
   description = "secops check"
