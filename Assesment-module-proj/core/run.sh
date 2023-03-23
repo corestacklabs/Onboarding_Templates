@@ -42,3 +42,4 @@ fi
 terraform init
 terraform apply -var-file="vars.tfvars" -auto-approve
 echo "Approved"
+fi
