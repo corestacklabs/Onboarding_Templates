@@ -6,6 +6,11 @@ variable "project_id" {
   type = string
   description = "List of projects on which the service is going to be enabled"
 }
+variable "role_id" {
+type = string
+default = null
+nullable = true  
+}
 variable "api" {
     type = set(string)
     description = "List of APIS that needs to be enabled per project"
