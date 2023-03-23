@@ -80,6 +80,7 @@ service_account_email = "$svcacc"
 role_id = "$roleid"
 permissionsec = "yes"
 EOF
+      fi
       elif [ "${role}" == "Yes" ]||[ "${role}" == "yes" ] ; then
         echo "granting predefined roles:(roles/viewer)"
         cat <<EOF > ./vars.tfvars
