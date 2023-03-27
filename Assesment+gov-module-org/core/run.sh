@@ -28,7 +28,7 @@ service_account_email = "$svcacc"
 role_id = "$roleid"
 api = ["cloudresourcemanager.googleapis.com" ,"compute.googleapis.com","recommender.googleapis.com", "securitycenter.googleapis.com", "orgpolicy.googleapis.com", "sqladmin.googleapis.com", "monitoring.googleapis.com", "pubsub.googleapis.com"]
 EOF
-  elif ["${secops}" == "yes" || "${secops}" == "Yes"]; then
+  elif [ "${secops}" == "yes" ] || [ "${secops}" == "Yes" ]; then
  cat <<EOF > ./vars.tfvars
 org_id = "$org_id"
 service_account_email = "$svcacc"
