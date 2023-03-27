@@ -27,6 +27,7 @@ project_id = "$proj_id"
 service_account_email = "$svcacc"
 permissionsec = "Yes"
 EOF
+fi
 terraform init
 terraform apply -var-file="vars.tfvars" -auto-approve
 echo "Approved"
