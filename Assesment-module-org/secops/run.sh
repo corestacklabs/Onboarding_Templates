@@ -28,6 +28,7 @@ service_account_email = "$svcacc"
 permissionsec = "Yes"
 api = ["cloudresourcemanager.googleapis.com" ,"compute.googleapis.com", "securitycenter.googleapis.com", "orgpolicy.googleapis.com"]
 EOF
+fi
 terraform init
 terraform apply -var-file="vars.tfvars" -auto-approve
 echo "Approved"
