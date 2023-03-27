@@ -1,6 +1,12 @@
 echo "Please ensure you have the necessary IAM permissions .The execution of this script requires following user account permissions: "
 echo "- Organization level Security Admin Role"
 echo "- Service Usage Admin"
+if [ -f vars.tfvars ]; then
+  echo vars.tfvars exists.
+  terraform init
+  terraform apply -var-file="vars.tfvars" -auto-approve
+  echo "Approved"
+else
 read -p "Please specify yes if above pre-requisites met or specify no : " INPUT
 if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
    echo 'Exiting..'
@@ -25,4 +31,5 @@ EOF
 terraform init
 terraform apply -var-file="vars.tfvars" -auto-approve
 echo "Approved"
+fi
 fi
