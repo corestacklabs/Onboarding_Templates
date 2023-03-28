@@ -8,7 +8,10 @@ variable "assign_role" {
   description = "Predefined roles"
   default = ["viewer"]
 }
-
+variable "project_id" {
+  type = string
+  description = "List of projects on which the service is going to be enabled"
+}
  
 variable "org_id" {
   type = string

@@ -13,9 +13,11 @@ if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
    exit 0 
 elif [ "${INPUT}" == "Yes" ]||[ "${INPUT}" == "yes" ] ; then   
 read -p "Please enter the Organisation id: " org_id
+read -p "Please enter the project id: " proj_id
 read -p "Please enter the service account email: " svcacc
 cat <<EOF > ./vars.tfvars
 org_id = "$org_id"
+project_id = "$proj_id"
 service_account_email = "$svcacc"
 api = ["cloudresourcemanager.googleapis.com" ,"compute.googleapis.com","recommender.googleapis.com"]
 EOF
