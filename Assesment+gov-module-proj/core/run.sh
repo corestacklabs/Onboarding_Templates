@@ -31,7 +31,7 @@ project_id = "$proj_id"
 service_account_email = "$svcacc"
 role_id = "$roleid"
 EOF
-      elif [ "${secops}" == "No" ] || [ "${secops}" == "no" ] ; then
+      elif [ "${secops}" == "Yes" ] || [ "${secops}" == "yes" ] ; then
         cat <<EOF > ./vars.tfvars
 project_id = "$proj_id"
 service_account_email = "$svcacc"
