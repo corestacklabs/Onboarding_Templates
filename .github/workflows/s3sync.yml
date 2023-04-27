@@ -11,8 +11,8 @@ jobs:
     - name: sync s3
       shell: bash
       env:
-        aws_key_id: ${{ secrets.S3_ACCESS }}
-        aws_secret_access_key: ${{ secrets.S3_SECRET }}
+        aws_key_id: ${{ secrets.CORESTACK_CFN_S3_BUCKET_ACCESS_KEY}}
+        aws_secret_access_key: ${{ secrets.CORESTACK_CFN_S3_BUCKET_SECRET_KEY }}
         aws_s3_bucket: ${{ secrets.S3_BUCKET }}
       run: |
         sudo apt-get update && sudo apt-get -y install awscli
