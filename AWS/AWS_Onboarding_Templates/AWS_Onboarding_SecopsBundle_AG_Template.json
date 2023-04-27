@@ -1,6 +1,6 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
-	"Description": "Creates a new IAM role for your AWS account with ReadOnlyAccess permissions needed for Secops Bundle",
+	"Description": "Creates a new IAM role for your AWS account with Read and Limited Write Access permissions needed for Secops Bundle",
 	"Parameters": {
 		"RoleName": {
 			"Type": "String",
@@ -99,6 +99,46 @@
           }
         ]
 
+			}
+		},
+		"InventorySecopsWritePolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "CoreStack_ComputeOptimizerPolicy",
+				"PolicyDocument": {
+					"Statement": [{
+						"Sid": "Auth",
+						"Action": [
+							"workspaces:TerminateWorkspaces",
+							"ec2:DeregisterImage",
+							"ec2:DeleteSnapshot",
+							"ec2:TerminateInstances",
+							"elasticloadbalancing:CreateLoadBalancer",
+							"rds:DeleteDBSnapshot",
+							"ec2:StopInstances",
+							"elasticloadbalancing:DeleteLoadBalancer",
+							"ec2:DeleteVolume",
+							"workspaces:StopWorkspaces",
+							"rds:DeleteDBClusterSnapshot",
+							"ec2:StartInstances",
+							"redshift:DeleteClusterSnapshot",
+							"workspaces:StartWorkspaces",
+							"rds:ModifyDBInstance",
+							"rds:ModifyDBCluster",
+							"ec2:ModifyInstanceAttribute",
+							"elasticloadbalancing:ModifyLoadBalancerAttributes",
+							"s3:DeleteBucket",
+							"rds:DeleteDBCluster",
+							"elasticache:DeleteSnapshot",
+							"rds:DeleteDBInstance"
+						],
+						"Effect": "Allow",
+						"Resource": "*"
+					}]
+				},
+				"Roles": [{
+					"Ref": "Role"
+				}]
 			}
 		},
 		"InventorySecopsReadPolicy": {

@@ -11,13 +11,15 @@
 		},
 		"ExternalId": {
 			"Type": "String",
-			"Description": "The external ID can be any word or number that is agreed upon between you and the third-party (Corestack - 028811834831) account.",
+			"Description": "The external ID can be any word or number that is agreed upon between you and the third-party (Corestack - 028811834831) account. Use alphanumeric and '=,.@:\/-' characters.",
+			"AllowedPattern": "[a-zA-Z0-9=,.@:\/-]*",
 			"MinLength": "1",
 			"MaxLength": "64"
 		},
 		"AWSCostAndUsageReportCURBucketName": {
 			"Type": "String",
-			"Description": "The name of the Cost and Usage Report (CUR) S3 bucket name to get Cost details. NOTE: THIS IS AN OPTIONAL PARAMETER, SHOULD BE INCLUDED FOR AWS MANAGEMENT/LINKED/STANDARD ACCOUNTS FOR WHICH CUR IS ENABLED!!!!",
+			"Description": "The name of the Cost and Usage Report (CUR) S3 bucket name to get Cost details. NOTE: THIS IS AN OPTIONAL PARAMETER, SHOULD BE INCLUDED FOR AWS MANAGEMENT/LINKED/STANDARD ACCOUNTS FOR WHICH CUR IS ENABLED!!!!Use lowercase letters, numbers, periods (.), hyphens (-), and underscores (_)",
+			"AllowedPattern": "^[a-z0-9\\.\\-\\_]*$",
 			"MinLength": "0",
 			"MaxLength": "64"
 		},
