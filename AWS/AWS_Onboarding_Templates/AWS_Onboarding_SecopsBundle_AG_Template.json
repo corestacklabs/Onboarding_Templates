@@ -27,7 +27,7 @@
 		},
 		"CoreStackAccountId": {
 			"Type": "String",
-			"Description": "The AWS Account ID of Corestack.",
+			"Description": "The AWS Account ID of Corestack",
 			"Default": "028811834831"
 		}
 	},
