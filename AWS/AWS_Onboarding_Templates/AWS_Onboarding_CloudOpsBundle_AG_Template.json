@@ -18,7 +18,7 @@
 		},
 		"IAMPermissionInclude": {
 			"Type": "String",
-			"Description": "Permission to include IAM Write Access",
+			"Description": "Permission to include IAM Write Access.",
 			"Default": "Allow",
 			"AllowedValues": [
 				"Allow",
