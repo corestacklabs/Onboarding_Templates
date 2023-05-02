@@ -31,3 +31,5 @@ jobs:
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_FinopsLimitedAccess_Template.json  --acl public-read
         aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_SecopsBundle_Template.json s3://$aws_s3_bucket/
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_SecopsBundle_Template.json  --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_SecopsBundle_AG_Template.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_SecopsBundle_AG_Template.json  --acl public-read
