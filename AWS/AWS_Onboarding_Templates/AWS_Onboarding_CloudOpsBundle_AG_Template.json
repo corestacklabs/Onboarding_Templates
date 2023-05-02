@@ -1,6 +1,6 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
-	"Description": "Creates a new IAM role for your AWS Master account with Read & Write permissions needed for CloudOps Bundle",
+	"Description": "Creates a new IAM role for your AWS Master account with Read & Write permissions needed for CloudOps Bundle.",
 	"Parameters": {
 		"RoleName": {
 			"Type": "String",
