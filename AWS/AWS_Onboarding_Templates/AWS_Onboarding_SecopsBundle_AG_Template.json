@@ -104,7 +104,7 @@
 		"InventorySecopsWritePolicy": {
 			"Type": "AWS::IAM::Policy",
 			"Properties": {
-				"PolicyName": "CoreStack_ComputeOptimizerPolicy",
+				"PolicyName": "CoreStack_InventorySecopsWritePolicy",
 				"PolicyDocument": {
 					"Statement": [{
 						"Sid": "Auth",
