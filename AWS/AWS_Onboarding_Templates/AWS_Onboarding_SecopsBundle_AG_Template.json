@@ -4,7 +4,7 @@
 	"Parameters": {
 		"RoleName": {
 			"Type": "String",
-			"Description": "The name of the IAM role to create. Use alphanumeric and '+=,.@-_' characters.",
+			"Description": "The name of the IAM role to create. Use alphanumeric and '+=,.@-_' characters",
 			"AllowedPattern": "[\\w+=,.@-]{1,64}",
 			"MinLength": "1",
 			"MaxLength": "64"
