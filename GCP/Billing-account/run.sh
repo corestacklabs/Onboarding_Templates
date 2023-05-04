@@ -19,6 +19,7 @@ if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
    exit 0
 
 elif [ "${INPUT}" == "Yes" ]||[ "${INPUT}" == "yes" ] ; then   
+gcloud services enable bigquerydatatransfer.googleapis.com --project=$projectid
 terraform init
 bq query --display_name=auth-bq --location=$bucketloc --project_id=$projectid --batch --use_legacy_sql=false --schedule='None' "DECLARE"
 cat <<EOF > ./vars.tfvars
