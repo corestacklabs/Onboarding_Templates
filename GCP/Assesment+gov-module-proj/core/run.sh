@@ -54,6 +54,7 @@ EOF
 project_id = "$proj_id"
 service_account_email = "$svcacc"
 EOF
+fi
   fi
   terraform init
   terraform apply -var-file="vars.tfvars" -auto-approve
