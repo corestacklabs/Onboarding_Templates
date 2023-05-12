@@ -22,7 +22,7 @@ resource "google_project_iam_custom_role" "my-custom-role" {
   permissions = var.permissionsec == null ? var.permission_nosecops : var.permission_full
 }
 resource "google_project_iam_member" "binding_role" {
-  for_each = var.assign_role
+  for_each = var.assign_role_viewer == null ? var.assign_role_editor : var.assign_role_viewer
   role   =  var.role_id == null ? "roles/${each.value}" : "projects/${var.project_id}/roles/${var.role_id}"
   project = var.project_id
   member = "serviceAccount:${var.service_account_email}"

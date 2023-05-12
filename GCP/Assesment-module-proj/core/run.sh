@@ -17,7 +17,7 @@ else
     read -p "Please enter the service account email: " svcacc
     read -p "Assign predefined role?(roles/viewer) specify yes or no: " role
       if [ "${role}" == "No" ] || [ "${role}" == "no" ] ; then
-      read -p "Do you need to retrive vunrelabilities and threat from GCP console? specify yes or no:" secops
+      read -p "Do you want to use the GCP Security Command Center? specify yes or no:" secops
       read -p "Creating custom role, provide the name: " roleid
       if [ "${secops}" == "No" ] || [ "${secops}" == "no" ] ; then
         cat <<EOF > ./vars.tfvars
