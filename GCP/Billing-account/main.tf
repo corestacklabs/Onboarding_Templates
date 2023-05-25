@@ -14,7 +14,6 @@ resource "google_service_account" "service_account" {
   account_id   = "corestack-auth"
   display_name = "corestack-auth"
   project = var.project_id
-  uniform_bucket_level_access = true
 }
 
 resource "google_project_iam_custom_role" "my_custom_proj_role" {
@@ -34,6 +33,7 @@ resource "google_storage_bucket" "bucket" {
   name          = local.bucket_name
   location      = var.bucket_location
   project =  var.project_id
+  uniform_bucket_level_access = true
 }
 
 # Resource for Query1
