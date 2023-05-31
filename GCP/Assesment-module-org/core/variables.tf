@@ -6,7 +6,7 @@ variable "service_account_email" {
 variable "assign_role" {
   type = set(string)
   description = "Predefined roles"
-  default = ["viewer"]
+  default = ["viewer","browser"]
 }
 variable "project_id" {
   type = string
