@@ -1,0 +1,291 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Creates a new IAM role for your AWS Master account with ReadOnlyAccess permissions needed for Compass",
+	"Parameters": {
+		"RoleName": {
+			"Type": "String",
+			"Description": "The name of the IAM role to create. Use alphanumeric and '+=,.@-_' characters.",
+			"AllowedPattern": "[\\w+=,.@-]{1,64}",
+			"MinLength": "1",
+			"MaxLength": "64"
+		},
+		"ExternalId": {
+			"Type": "String",
+			"Description": "The external ID can be any word or number that is agreed upon between you and the third-party (Corestack - 028811834831) account. Use alphanumeric and '=,.@:\/-' characters.",
+			"AllowedPattern": "[a-zA-Z0-9=,.@:\/-]*",
+			"MinLength": "1",
+			"MaxLength": "64"
+		},
+		"EnforceMFA": {
+			"Description": "Flag to enforce MFA (Multi-Factor Authentication) when Assuming the role.",
+			"Type": "String",
+			"Default": "false",
+			"AllowedValues": [
+				"true",
+				"false"
+			]
+		},
+		"CoreStackAccountId": {
+			"Type": "String",
+			"Description": "The AWS Account ID of Corestack.",
+			"Default": "028811834831"
+		}
+	},
+	"Conditions": {
+		"IncludeMFACondition": {
+			"Fn::Equals": [{
+					"Ref": "EnforceMFA"
+				},
+				"true"
+			]
+		}
+	},
+	"Resources": {
+		"Role": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "RoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [{
+						"Effect": "Allow",
+						"Principal": {
+							"AWS": {
+								"Fn::Join": [
+									"",
+									[
+										"arn:aws:iam::",
+										{
+											"Ref": "CoreStackAccountId"
+										},
+										":root"
+									]
+								]
+							}
+						},
+						"Condition": {
+							"Fn::If": [
+								"IncludeMFACondition",
+								{
+									"StringEquals": {
+										"sts:ExternalId": {
+											"Ref": "ExternalId"
+										}
+									},
+									"Bool": {
+										"aws:MultiFactorAuthPresent": "true"
+									}
+								},
+								{
+									"StringEquals": {
+										"sts:ExternalId": {
+											"Ref": "ExternalId"
+										}
+									}
+								}
+							]
+						},
+						"Action": [
+							"sts:AssumeRole"
+						]
+					}]
+				},
+				"Tags": [{
+					"Key": "Purpose",
+					"Value": "CoreStack"
+				}]
+			}
+		},
+		"InventoryReadPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "CoreStack_InventoryReadPolicy",
+				"PolicyDocument": {
+					"Statement": [{
+						"Sid": "Auth",
+						"Action": [
+							"access-analyzer:List*",
+							"acm:DescribeCertificate",
+							"acm:GetCertificate",
+							"acm:ListCertificates",
+							"acm:ListTagsForCertificate",
+							"apigateway:GET",
+							"application-autoscaling:DescribeScheduledActions",
+							"autoscaling:Describe*",
+							"backup:ListBackupVaults",
+							"batch:Describe*",
+							"clouddirectory:DescribeDirectories",
+							"clouddirectory:GetDirectory",
+							"clouddirectory:ListDirectories",
+							"cloudformation:DescribeStacks",
+							"cloudformation:GetStackPolicy",
+							"cloudformation:GetTemplate",
+							"cloudformation:ListStackResources",
+							"cloudformation:ListStacks",
+							"cloudfront:Get*",
+							"cloudfront:List*",
+							"cloudhsm:Describe*",
+							"cloudhsm:List*",
+							"cloudtrail:DescribeTrails",
+							"cloudtrail:Get*",
+							"cloudtrail:ListTrails",
+							"cloudwatch:Describe*",
+							"cloudwatch:GetDashboard",
+							"cloudwatch:ListDashboards",
+							"cloudwatch:GetMetricData",
+							"codeartifact:DescribeDomain",
+							"codepipeline:List",
+							"cognito-identity:Describe*",
+							"cognito-identity:Get*",
+							"cognito-user:List*",
+							"cognito-user:Describe*",
+							"config:DescribeConfigurationRecorderStatus",
+							"datapipeline:DescribePipelines",
+							"datapipeline:GetPipelineDefinition",
+							"datapipeline:ListPipelines",
+							"directconnect:Describe*",
+							"dms:Describe*",
+							"dynamodb:Describe*",
+							"dynamodb:List*",
+							"dynamodb:ListTagsOfResource",
+							"ec2:Describe*",
+							"ec2:GetEbsEncryptionByDefault",
+							"ec2:MonitorInstances",
+							"ecr:BatchGetImage",
+							"ecr:BatchImportUpstreamImage",
+							"ecr:DescribeRepositories",
+							"ecr:GetLifecyclePolicy",
+							"ecr:GetLifecyclePolicyPreview",
+							"ecr-public:GetRepositoryCatalogData",
+							"ecs:Describe*",
+							"ecs:List*",
+							"eks:Describe*",
+							"eks:List*",
+							"elasticache:Describe*",
+							"elasticbeanstalk:Describe*",
+							"elasticfilesystem:Describe*",
+							"elasticloadbalancing:Describe*",
+							"elasticmapreduce:Describe*",
+							"elasticmapreduce:List*",
+							"es:Describe*",
+							"es:ListDomainNames",
+							"glacier:Describe*",
+							"glacier:List*",
+							"guardduty:Describe*",
+							"guardduty:List*",
+							"iam:Get*",
+							"iam:List*",
+							"iam:SimulatePrincipalPolicy",
+							"iot:DescribeThing",
+							"iot:ListThings",
+							"inspector:Describe*",
+							"inspector:List*",
+							"kafka:Describe*",
+							"kafka:List*",
+							"kinesis:Describe*",
+							"kinesis:Get*",
+							"kinesis:List*",
+							"kms:Get*",
+							"kms:List*",
+							"lambda:Get*",
+							"lambda:List*",
+							"lightsail:Get*",
+							"logs:Describe*",
+							"logs:GetLogEvents",
+							"mgh:DescribeApplicationState",
+							"mgh:ListApplicationStates",
+							"mq:DescribeBroker",
+							"mq:ListBrokers",
+							"opsworks:Describe*",
+							"organizations:Describe*",
+							"organizations:List*",
+							"qldb:DescribeLedger",
+							"quicksight:Describe*",
+							"quicksight:List*",
+							"rds:Describe*",
+							"rds:List*",
+							"redshift:Describe*",
+							"route53:Get*",
+							"route53:List*",
+							"s3:GetAccountPublicAccessBlock",
+							"s3:GetBucketACL",
+							"s3:GetBucketLocation",
+							"s3:GetBucketLogging",
+							"s3:GetBucketNotification",
+							"s3:GetBucketPolicy",
+							"s3:GetBucketPublicAccessBlock",
+							"s3:GetBucketTagging",
+							"s3:GetBucketVersioning",
+							"s3:GetLifecycleConfiguration",
+							"s3:GetNotificationConfiguration",
+							"s3:GetEncryptionConfiguration",
+							"s3:HeadBucket",
+							"s3:ListAllMyBuckets",
+							"s3:ListBucket",
+							"sdb:DomainMetadata",
+							"sdb:ListDomains",
+							"servicecatalog:Describe*",
+							"servicecatalog:List*",
+							"secretsmanager:List*",
+							"secretsmanager:Describe*",
+							"sheild:DescribeProtection",
+							"sheild:ListProtections",
+							"sns:GetSnsTopic",
+							"sns:GetSubscriptionAttributes",
+							"sns:GetTopicAttributes",
+							"sns:ListSubscriptionsByTopic",
+							"sns:ListTopics",
+							"sqs:GetQueueAttributes",
+							"sqs:ListQueues",
+							"ssm:Describe*",
+							"ssm:Get*",
+							"ssm:List*",
+							"storagegateway:Describe*",
+							"storagegateway:List*",
+							"swf:List*",
+							"waf:Get*",
+							"waf:List*",
+							"waf-regional:Get*",
+							"waf-regional:List*",
+							"wafv2:Get*",
+							"wafv2:List*",
+							"workmail:Describe*",
+							"workmail:List*",
+							"workspaces:Describe*"
+						],
+						"Effect": "Allow",
+						"Resource": "*"
+					}]
+				},
+				"Roles": [{
+					"Ref": "Role"
+				}]
+			}
+		}
+	},
+	"Outputs": {
+		"RoleARN": {
+			"Description": "ARN of the IAM Role.",
+			"Value": {
+				"Fn::GetAtt": [
+					"Role",
+					"Arn"
+				]
+			}
+		},
+		"ExternalId": {
+			"Description": "ExternalId used in Role trusted policy.",
+			"Value": {
+				"Ref": "ExternalId"
+			}
+		},
+		"MFAEnabled": {
+			"Description": "Flag to identify MFA enforced for the role or not.",
+			"Value": {
+				"Ref": "EnforceMFA"
+			}
+		}
+	}
+}
