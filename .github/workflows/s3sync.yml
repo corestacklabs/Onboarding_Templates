@@ -37,3 +37,8 @@ jobs:
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_FinopsBundle_AG_Template.json  --acl public-read
         aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_CloudOpsBundle_AG_Template.json s3://$aws_s3_bucket/
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_CloudOpsBundle_AG_Template.json  --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_CompassBundle_ReadTemplate.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_CompassBundle_ReadTemplate.json  --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_CompassBundle_ReadTemplateWith_WAFSync.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_CompassBundle_ReadTemplateWith_WAFSync.json  --acl public-read
+        
