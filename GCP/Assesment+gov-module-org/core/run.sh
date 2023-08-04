@@ -15,7 +15,6 @@ if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
    exit 0 
 elif [ "${INPUT}" == "Yes" ]||[ "${INPUT}" == "yes" ] ; then   
 read -p "Please enter the Organisation id: " org_id
-read -p "Please enter the project id: " proj_id
 read -p "Please enter the service account email: " svcacc
 echo "Assign predefined role?"
 echo "- roles/editor"
