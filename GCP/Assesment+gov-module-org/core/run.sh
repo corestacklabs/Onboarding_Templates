@@ -30,7 +30,6 @@ read -p "Please specify yes or no: " role
   if [ "${secops}" == "No" ] || [ "${secops}" == "no" ] ; then
   cat <<EOF > ./vars.tfvars
 org_id = "$org_id"
-project_id = "$proj_id"
 service_account_email = "$svcacc"
 role_id = "$roleid"
 api = ["cloudresourcemanager.googleapis.com" ,"compute.googleapis.com","recommender.googleapis.com", "securitycenter.googleapis.com", "orgpolicy.googleapis.com", "sqladmin.googleapis.com", "monitoring.googleapis.com", "pubsub.googleapis.com"]
@@ -48,7 +47,6 @@ fi
   echo "granting predefined roles:"
   cat <<EOF > ./vars.tfvars
 org_id = "$org_id"
-project_id = "$proj_id"
 service_account_email = "$svcacc"
 api = ["cloudresourcemanager.googleapis.com" ,"compute.googleapis.com","recommender.googleapis.com", "securitycenter.googleapis.com", "orgpolicy.googleapis.com", "sqladmin.googleapis.com", "monitoring.googleapis.com", "pubsub.googleapis.com"]
 EOF
