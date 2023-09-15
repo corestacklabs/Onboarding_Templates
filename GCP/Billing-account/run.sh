@@ -11,7 +11,7 @@ if [ -f vars.tfvars ]; then
   echo "Approved"
 else 
 read -p "Please enter the project id: " projectid
-read -p "Please enter the bucket location: " bucketloc
+read -p "Please enter the data location: " bucketloc
 read -p "Please enter the tableid: " tableid
 if [ "${INPUT}" == "No" ] || [ "${INPUT}" == "no" ] ; then
      # exiting with return code 0
