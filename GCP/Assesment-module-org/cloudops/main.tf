@@ -36,13 +36,13 @@ resource "google_organization_iam_member" "binding_custom_role" {
   ]
 }
 
-# Resource to execute the python script that will enable the apis. 
-resource "null_resource" "Project_script" {
- provisioner "local-exec" {  
-    command = "/bin/python3 extractor.py"
-  }
-  depends_on = [
-    google_organization_iam_member.binding_custom_role
-  ]
-}
+# # Resource to execute the python script that will enable the apis. 
+# resource "null_resource" "Project_script" {
+#  provisioner "local-exec" {  
+#     command = "/bin/python3 extractor.py"
+#   }
+#   depends_on = [
+#     google_organization_iam_member.binding_custom_role
+#   ]
+# }
 
