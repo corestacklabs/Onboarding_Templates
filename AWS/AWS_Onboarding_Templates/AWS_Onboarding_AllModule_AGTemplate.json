@@ -430,6 +430,7 @@
                                 "cloudtrail:DeleteTrail",
                                 "cloudtrail:PutEventSelectors",
                                 "cloudtrail:UpdateTrail",
+                                "cloudtrail:LookupEvents",
                                 "cloudtrail:AddTags",
                                 "cloudtrail:StartLogging",
                                 "cloudwatch:DeleteAlarms",
