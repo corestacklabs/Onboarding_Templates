@@ -129,6 +129,7 @@
 							"cloudhsm:Describe*",
 							"cloudhsm:List*",
 							"cloudtrail:DescribeTrails",
+							"cloudtrail:LookupEvents",
 							"cloudtrail:Get*",
 							"cloudtrail:ListTrails",
 							"cloudwatch:Describe*",
