@@ -157,6 +157,7 @@
 							"cloudtrail:DeleteTrail",
 							"cloudtrail:PutEventSelectors",
 							"cloudtrail:UpdateTrail",
+							"cloudtrail:LookupEvents",
 							"cloudwatch:DeleteAlarms",
 							"cloudwatch:PutMetricAlarm",
 							"cloudwatch:TagResource",
