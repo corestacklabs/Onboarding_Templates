@@ -457,6 +457,7 @@
                         "cloudtrail:PutEventSelectors",
                         "cloudtrail:StartLogging",
                         "cloudtrail:UpdateTrail",
+			"cloudtrail:LookupEvents",
                         "cloudwatch:DeleteAlarms",
                         "cloudwatch:DisableAlarmActions",
                         "cloudwatch:EnableAlarmActions",
