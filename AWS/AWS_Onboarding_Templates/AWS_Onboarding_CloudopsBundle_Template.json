@@ -133,6 +133,7 @@
 							"cloudtrail:DescribeTrails",
 							"cloudtrail:Get*",
 							"cloudtrail:ListTrails",
+							"cloudtrail:LookupEvents",
 							"cloudwatch:Describe*",
 							"cloudwatch:GetDashboard",
 							"cloudwatch:GetMetricData",
