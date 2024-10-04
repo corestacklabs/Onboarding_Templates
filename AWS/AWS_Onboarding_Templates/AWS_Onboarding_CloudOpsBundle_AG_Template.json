@@ -441,9 +441,7 @@
 							"iam:ListRolePolicies",
 							"iam:ListRoles",
 							"s3:GetBucketLocation",
-							"s3:GetBucketTagging",
-							"s3:HeadBucket",
-							"s3:ListObjects"
+							"s3:GetBucketTagging"
 						],
 						"Effect": "Allow",
 						"Resource": "*"
