@@ -240,7 +240,12 @@
 							"workspaces:CreateTags",
 							"workspaces:StartWorkspaces",
 							"workspaces:StopWorkspaces",
-							"workspaces:TerminateWorkspaces"
+							"workspaces:TerminateWorkspaces",
+							"s3:getbucketpolicy",
+							"s3:putbucketpolicy",
+							"cloudtrail:startLogging",
+							"cloudtrail:AddTags"
+ 
 						],
 						"Effect": "Allow",
 						"Resource": "*"
