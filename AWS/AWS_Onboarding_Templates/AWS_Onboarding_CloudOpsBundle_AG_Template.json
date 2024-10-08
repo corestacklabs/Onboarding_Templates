@@ -411,7 +411,17 @@
 							"wafv2:List*",
 							"workmail:Describe*",
 							"workmail:List*",
-							"workspaces:Describe*"
+							"workspaces:Describe*",
+							"ssm:CancelCommand",
+							"ssm:GetCommandInvocation",
+							"ssm:ListCommandInvocations",
+							"ssm:ListCommands",
+							"ssm:SendCommand",
+							"ssm:CancelCommand",
+							"ssm:GetCommandInvocation",
+							"ssm:ListCommandInvocations",
+							"ssm:ListCommands",
+							"ssm:SendCommand"
 						],
 						"Effect": "Allow",
 						"Resource": "*"
