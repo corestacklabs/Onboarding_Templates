@@ -412,7 +412,6 @@
 							"workmail:Describe*",
 							"workmail:List*",
 							"workspaces:Describe*",
-							"ssm:CancelCommand",
 							"ssm:GetCommandInvocation",
 							"ssm:ListCommandInvocations",
 							"ssm:ListCommands",
@@ -420,8 +419,11 @@
 							"ssm:CancelCommand",
 							"ssm:GetCommandInvocation",
 							"ssm:ListCommandInvocations",
-							"ssm:ListCommands",
-							"ssm:SendCommand"
+							"backup:GetBackupPlan",
+							"backup:ListBackupJobs",
+							"ssm:StartAutomationExecution",
+							"ssm:StopAutomationExecution"
+							
 						],
 						"Effect": "Allow",
 						"Resource": "*"
