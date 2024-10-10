@@ -296,6 +296,7 @@
        },
     "ConfigPermission":{
          "Type":"AWS::IAM::Policy",
+	 "Condition":"ConfigAllow",
          "Properties":{
             "PolicyName":"CoreStack_ConfigPermission",
             "PolicyDocument":{
