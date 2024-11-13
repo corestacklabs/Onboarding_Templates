@@ -399,7 +399,8 @@
                         "wellarchitected:AssociateLenses",
                         "wellarchitected:CreateMilestone",
                         "wellarchitected:CreateWorkload",
-                        "wellarchitected:UpdateAnswer"
+                        "wellarchitected:UpdateAnswer",
+			"wellarchitected:DisassociateLenses"
                      ],
                      "Effect":"Allow",
                      "Resource":"*"
@@ -558,8 +559,7 @@
                         "workspaces:RebootWorkspaces",
                         "workspaces:StartWorkspaces",
                         "workspaces:StopWorkspaces",
-                        "workspaces:TerminateWorkspaces",
-			"wellarchitected:DisassociateLenses"
+                        "workspaces:TerminateWorkspaces"
                      ],
                      "Effect":"Allow",
                      "Resource":"*"
