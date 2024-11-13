@@ -43,3 +43,7 @@ jobs:
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_CompassBundle_ReadTemplateWith_WAFSync.json  --acl public-read
         aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_AllModule_Read_GovernanceTemplate.json s3://$aws_s3_bucket/
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_AllModule_Read_GovernanceTemplate.json  --acl public-read
+        aws s3 cp AWS/GE_Vernova/GEV_CloudOps_CloudwatchOnly.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key GEV_CloudOps_CloudwatchOnly.json  --acl public-read
+        aws s3 cp AWS\GE_Vernova\GEVernova-CloudOpsOnly.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key GEV_CloudOpsOnly.json  --acl public-read
