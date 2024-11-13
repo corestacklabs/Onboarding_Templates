@@ -427,7 +427,8 @@
                         "iam:DeleteRole",
                         "iam:DeleteRolePolicy",
                         "iam:PutRolePolicy",
-                        "iam:UpdateAssumeRolePolicy"
+                        "iam:UpdateAssumeRolePolicy",
+			"iam:Generate*"
                      ],
                      "Effect":"Allow",
                      "Resource":"*"
