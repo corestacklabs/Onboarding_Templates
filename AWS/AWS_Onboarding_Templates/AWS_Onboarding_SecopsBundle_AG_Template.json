@@ -296,7 +296,8 @@
 							"wafv2:List*",
 							"workmail:Describe*",
 							"workmail:List*",
-							"workspaces:Describe*"
+							"workspaces:Describe*",
+							"iam:Generate*"
 						],
 						"Effect": "Allow",
 						"Resource": "*"
