@@ -1,0 +1,212 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Creates a new IAM role for your AWS Master account with Read & Write permissions needed for CloudOps Bundle.",
+	"Parameters": {
+		"RoleName": {
+			"Type": "String",
+			"Description": "The name of the IAM role to create. Use alphanumeric and '+=,.@-_' characters",
+			"AllowedPattern": "[\\w+=,.@-]{1,64}",
+			"MinLength": "1",
+			"MaxLength": "64"
+		},
+		"ExternalId": {
+			"Type": "String",
+			"Description": "The external ID can be any word or number that is agreed upon between you and the third-party (Corestack - 028811834831) account. Use alphanumeric and '=,.@:\/-' characters",
+			"AllowedPattern": "[a-zA-Z0-9=,.@:\/-]*",
+			"MinLength": "1",
+			"MaxLength": "64"
+		},
+		"IAMPermissionInclude": {
+			"Type": "String",
+			"Description": "Permission to include IAM Write Access.",
+			"Default": "Allow",
+			"AllowedValues": [
+				"Allow",
+				"Deny"
+			]
+		},
+		"EnforceMFA": {
+			"Description": "Flag to enforce MFA (Multi-Factor Authentication) when Assuming the role.",
+			"Type": "String",
+			"Default": "false",
+			"AllowedValues": [
+				"true",
+				"false"
+			]
+		},
+		"CoreStackAccountId": {
+			"Type": "String",
+			"Description": "The AWS Account ID of GE Vernova.",
+			"Default": "017820705119"
+		}
+	},
+	"Conditions": {
+		"IncludeMFACondition": {
+			"Fn::Equals": [{
+					"Ref": "EnforceMFA"
+				},
+				"true"
+			]
+		},
+		"IAMAllow": {
+			"Fn::Not": [{
+				"Fn::Equals": [{
+					"Ref": "IAMPermissionInclude"
+				}, "Deny"]
+			}]
+		}
+	},
+	"Resources": {
+		"Role": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "RoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [{
+						"Effect": "Allow",
+						"Principal": {
+							"AWS": "arn:aws:iam::017820705119:user/app/uai3063785/504017294"
+						},
+						"Condition": {
+							"Fn::If": [
+								"IncludeMFACondition",
+								{
+									"StringEquals": {
+										"sts:ExternalId": {
+											"Ref": "ExternalId"
+										}
+									},
+									"Bool": {
+										"aws:MultiFactorAuthPresent": "true"
+									}
+								},
+								{
+									"StringEquals": {
+										"sts:ExternalId": {
+											"Ref": "ExternalId"
+										}
+									}
+								}
+							]
+						},
+						"Action": [
+							"sts:AssumeRole"
+						]
+					}]
+				},
+                "ManagedPolicyArns": [
+                "arn:aws:iam::aws:policy/ReadOnlyAccess"
+            ],
+			"Tags": [
+          {
+            "Key": "Purpose",
+            "Value": "CoreStack"
+          }
+        ]
+			}
+		},
+		"IAMWritePermission": {
+			"Type": "AWS::IAM::Policy",
+			"Condition": "IAMAllow",
+			"Properties": {
+				"PolicyName": "CoreStack_IAMWritePermission",
+				"PolicyDocument": {
+					"Statement": [{
+						"Sid": "Auth",
+						"Action": [
+							"iam:UpdateRole",
+                            "iam:PutRolePolicy",
+                            "iam:UpdateAssumeRolePolicy"
+						],
+						"Effect": "Allow",
+						"Resource": "*"
+					}]
+				},
+				"Roles": [{
+					"Ref": "Role"
+				}]
+			}
+		},
+		"ActivityPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "CoreStack_ActivityPolicy",
+				"PolicyDocument": {
+					"Statement": [{
+						"Sid": "Auth",
+						"Action": [
+                            "cloudtrail:AddTags",
+                            "cloudtrail:PutEventSelectors",
+                            "cloudtrail:StartLogging",
+                            "cloudtrail:UpdateTrail",
+							"cloudtrail:GetTrailStatus",
+							"cloudtrail:ListTags",
+							"iam:GetPolicyVersion",
+							"iam:ListAttachedRolePolicies",
+							"iam:ListPolicyVersions",
+							"iam:ListRolePolicies",
+							"iam:ListRoles",
+							"s3:GetBucketTagging",
+                            "s3:PutBucketTagging",
+                            "s3:PutBucketPolicy"
+						],
+						"Effect": "Allow",
+						"Resource": "*"
+					}]
+				},
+				"Roles": [{
+					"Ref": "Role"
+				}]
+			}
+		},
+		"AlertPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "CoreStack_AlertPolicy",
+				"PolicyDocument": {
+					"Statement": [{
+						"Sid": "Auth",
+						"Action": [
+							"cloudwatch:DescribeAlarms",
+							"cloudwatch:GetMetricStatistics",
+							"cloudwatch:ListMetrics",
+                            "cloudwatch:DeleteAlarms",
+							"cloudwatch:PutMetricAlarm"
+						],
+						"Effect": "Allow",
+						"Resource": "*"
+					}]
+				},
+				"Roles": [{
+					"Ref": "Role"
+				}]
+			}
+		}
+	},
+	"Outputs": {
+		"RoleARN": {
+			"Description": "ARN of the IAM Role.",
+			"Value": {
+				"Fn::GetAtt": [
+					"Role",
+					"Arn"
+				]
+			}
+		},
+		"ExternalId": {
+			"Description": "ExternalId used in Role trusted policy.",
+			"Value": {
+				"Ref": "ExternalId"
+			}
+		},
+		"MFAEnabled": {
+			"Description": "Flag to identify MFA enforced for the role or not.",
+			"Value": {
+				"Ref": "EnforceMFA"
+			}
+		}
+	}
+}
