@@ -558,7 +558,8 @@
                         "workspaces:RebootWorkspaces",
                         "workspaces:StartWorkspaces",
                         "workspaces:StopWorkspaces",
-                        "workspaces:TerminateWorkspaces"
+                        "workspaces:TerminateWorkspaces",
+			"wellarchitected:DisassociateLenses"
                      ],
                      "Effect":"Allow",
                      "Resource":"*"
