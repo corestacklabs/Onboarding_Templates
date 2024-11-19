@@ -306,7 +306,7 @@
                         "wellarchitected:CreateMilestone",
                         "wellarchitected:CreateWorkload",
                         "wellarchitected:UpdateAnswer",
-			            "wellarchitected:DisassociateLenses"
+		        "wellarchitected:DisassociateLenses"
                      ],
                      "Effect":"Allow",
                      "Resource":"*"
