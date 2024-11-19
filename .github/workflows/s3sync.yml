@@ -47,3 +47,5 @@ jobs:
         aws s3api put-object-acl --bucket $aws_s3_bucket --key GEV_CloudOps_CloudwatchOnly.json  --acl public-read
         aws s3 cp AWS/GE_Vernova/GEVernova-CloudOpsOnly.json s3://$aws_s3_bucket/
         aws s3api put-object-acl --bucket $aws_s3_bucket --key GEVernova-CloudOpsOnly.json  --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_AllModule_Template_WithWAFSync.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_AllModule_Template_WithWAFSync.json  --acl public-read
