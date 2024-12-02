@@ -277,6 +277,7 @@
                      "Sid":"Auth",
                      "Action":[
                         "config:DescribeConfigRuleEvaluationStatus",
+                        "config:DescribeConfigurationRecorderStatus", 
                         "config:DescribeConfigurationRecorders",
                         "config:GetComplianceDetailsByConfigRule",
                         "config:ListDiscoveredResources"
@@ -419,6 +420,7 @@
                         "dynamodb:Describe*",
                         "dynamodb:List*",
                         "ec2:Describe*",
+                        "ec2:GetEbsEncryptionByDefault",
                         "ecr-public:DescribeRepositories",
                         "ecr-public:GetRepositoryCatalogData",
                         "ecr:BatchGetImage",
@@ -450,6 +452,9 @@
                         "glue:Get*",
                         "glue:List*",
                         "iam:SimulatePrincipalPolicy",
+                        "iam:GenerateCredentialReport",
+				            "iam:GenerateOrganizationsAccessReport",
+				            "iam:GenerateServiceLastAccessedDetails",
                         "iot:DescribeThing",
                         "iot:ListThings",
                         "kafka:Describe*",
@@ -502,6 +507,7 @@
                         "secretsmanager:Describe*",
                         "secretsmanager:List*",
                         "securityhub:DescribeStandards",
+                        "securityhub:DescribeHub",
                         "securityhub:GetAdministratorAccount",
                         "securityhub:GetFindings",
                         "servicecatalog:Describe*",
