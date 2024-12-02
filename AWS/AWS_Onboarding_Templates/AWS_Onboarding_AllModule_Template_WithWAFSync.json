@@ -277,6 +277,7 @@
                       "Sid":"Auth",
                       "Action":[
                          "config:DescribeConfigRuleEvaluationStatus",
+			 "config:DescribeConfigurationRecorderStatus",
                          "config:DescribeConfigurationRecorders",
                          "config:GetComplianceDetailsByConfigRule",
                          "config:ListDiscoveredResources"
@@ -447,6 +448,7 @@
                          "dynamodb:Describe*",
                          "dynamodb:List*",
                          "ec2:Describe*",
+			 "ec2:GetEbsEncryptionByDefault",
                          "ecr-public:DescribeRepositories",
                          "ecr-public:GetRepositoryCatalogData",
                          "ecr:BatchGetImage",
@@ -529,6 +531,7 @@
                          "sdb:ListDomains",
                          "secretsmanager:Describe*",
                          "secretsmanager:List*",
+			 "securityhub:DescribeHub",
                          "securityhub:DescribeStandards",
                          "securityhub:GetAdministratorAccount",
                          "securityhub:GetFindings",
@@ -591,6 +594,9 @@
                          "cloudtrail:ListTrails",
                          "cloudtrail:LookupEvents",
                          "iam:Get*",
+			 "iam:GenerateCredentialReport",
+			 "iam:GenerateOrganizationsAccessReport",
+			 "iam:GenerateServiceLastAccessedDetails",
                          "iam:List*",
                          "s3:GetBucketLocation",
                          "s3:GetBucketTagging",
