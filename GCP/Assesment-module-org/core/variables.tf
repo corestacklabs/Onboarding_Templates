@@ -6,7 +6,7 @@ variable "service_account_email" {
 variable "assign_role" {
   type = set(string)
   description = "Predefined roles"
-  default = ["viewer","browser"]
+  default = ["viewer","browser","resourcemanager.organizationViewer", "resourcemanager.folderViewer"]
 }
 
 variable "org_id" {
