@@ -541,6 +541,7 @@
                         "rds:Stop*",
                         "redshift:DeleteClusterSecurityGroup",
                         "redshift:DeleteClusterSubnetGroup",
+			"redshift:DeleteClusterSnapshot",
                         "s3:CreateBucket",
                         "s3:DeleteBucket",
                         "s3:DeleteObject",
