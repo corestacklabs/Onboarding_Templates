@@ -5,7 +5,7 @@ on: [ push ]
 #
 jobs:
   s3-sync:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@master
     - name: sync s3
