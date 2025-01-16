@@ -44,7 +44,7 @@ resource "google_bigquery_data_transfer_config" "query_config_1"{
       data_source_id         = "scheduled_query"
       schedule               = "every 24 hours"
       params = {
-        query = "DECLARE unused STRING; DECLARE current_month_date DATE DEFAULT DATE_SUB(@run_date, INTERVAL 0 MONTH); DECLARE cost_data_invoice_month NUMERIC DEFAULT EXTRACT(MONTH FROM current_month_date); DECLARE cost_data_invoice_year NUMERIC DEFAULT EXTRACT(YEAR FROM current_month_date); EXPORT DATA OPTIONS ( uri = CONCAT('gs://${local.bucket_name}/', CAST(cost_data_invoice_year AS STRING), '-', CAST(current_month_date AS STRING FORMAT('MM')), '/', CAST(DATE(CURRENT_DATE()) as STRING FORMAT('YYYY-MM-DD')), '/*.csv'), format='JSON', overwrite=False) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE B.invoice.month = CONCAT(CAST(cost_data_invoice_year AS STRING), CAST(current_month_date AS STRING FORMAT('MM')))"
+        query = "DECLARE bucket_name STRING DEFAULT '${local.bucket_name}'; DECLARE current_date DATE DEFAULT CURRENT_DATE; DECLARE start_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(current_date, MONTH), 'US/Pacific'); DECLARE end_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_ADD(current_date, INTERVAL 1 MONTH), MONTH), 'US/Pacific'); DECLARE bucket_path STRING DEFAULT CONCAT('gs://', bucket_name, '/', FORMAT_DATE('%G-%m', current_date), '/', FORMAT_DATE('%F', current_date), '/*.csv'); EXPORT DATA OPTIONS (uri=(bucket_path), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE usage_start_time >= start_date AND usage_start_time < end_date AND _PARTITIONTIME >= TIMESTAMP(EXTRACT(DATE FROM start_date)) ;"
       }
     }
 
@@ -56,7 +56,7 @@ resource "google_bigquery_data_transfer_config" "query_config_2"{
       data_source_id         = "scheduled_query"
       schedule               = "5 of month 00:00"
       params = {
-        query = "DECLARE unused STRING; DECLARE current_month_date DATE DEFAULT DATE_SUB(@run_date, INTERVAL 1 MONTH); DECLARE cost_data_invoice_month NUMERIC DEFAULT EXTRACT(MONTH FROM current_month_date); DECLARE cost_data_invoice_year NUMERIC DEFAULT EXTRACT(YEAR FROM current_month_date); EXPORT DATA OPTIONS ( uri = CONCAT('gs://${local.bucket_name}/', CAST(cost_data_invoice_year AS STRING), '-', CAST(current_month_date AS STRING FORMAT('MM')), '_backfill/*.csv'), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE B.invoice.month = CONCAT(CAST(cost_data_invoice_year AS STRING), CAST(current_month_date AS STRING FORMAT('MM')))"
+        query = "DECLARE bucket_name STRING DEFAULT '${local.bucket_name}'; DECLARE current_date DATE DEFAULT CURRENT_DATE; DECLARE start_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_SUB(current_date, INTERVAL 1 MONTH), MONTH), 'US/Pacific'); DECLARE end_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_ADD(EXTRACT(DATE FROM start_date), INTERVAL 1 MONTH), MONTH), 'US/Pacific'); DECLARE bucket_path STRING DEFAULT CONCAT('gs://', bucket_name, '/', FORMAT_TIMESTAMP('%G-%m', start_date), '_backfill/*.csv'); EXPORT DATA OPTIONS (uri=(bucket_path), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE usage_start_time >= start_date AND usage_start_time < end_date AND _PARTITIONTIME >= TIMESTAMP(EXTRACT(DATE FROM start_date)) ;"
 
 
       }
@@ -70,7 +70,7 @@ resource "google_bigquery_data_transfer_config" "query_config_3"{
       data_source_id         = "scheduled_query"
       schedule               = "None"
       params = {
-        query = "DECLARE unused STRING; DECLARE current_month_date DATE DEFAULT DATE_SUB(@run_date, INTERVAL 1 MONTH); DECLARE cost_data_invoice_month NUMERIC DEFAULT EXTRACT(MONTH FROM current_month_date); DECLARE cost_data_invoice_year NUMERIC DEFAULT EXTRACT(YEAR FROM current_month_date); EXPORT DATA OPTIONS ( uri = CONCAT('gs://${local.bucket_name}/', CAST(cost_data_invoice_year AS STRING), '-', CAST(current_month_date AS STRING FORMAT('MM')), '/*.csv'), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE B.invoice.month = CONCAT(CAST(cost_data_invoice_year AS STRING), CAST(current_month_date AS STRING FORMAT('MM')))"
+        query = ""
       }
     }
 
@@ -82,7 +82,7 @@ resource "google_bigquery_data_transfer_config" "query_config_4"{
       data_source_id         = "scheduled_query"
       schedule               = "None"
       params = {
-        query = "DECLARE unused STRING; DECLARE current_month_date DATE DEFAULT DATE_SUB(@run_date, INTERVAL 2 MONTH); DECLARE cost_data_invoice_month NUMERIC DEFAULT EXTRACT(MONTH FROM current_month_date); DECLARE cost_data_invoice_year NUMERIC DEFAULT EXTRACT(YEAR FROM current_month_date); EXPORT DATA OPTIONS ( uri = CONCAT('gs://${local.bucket_name}/', CAST(cost_data_invoice_year AS STRING), '-', CAST(current_month_date AS STRING FORMAT('MM')), '/*.csv'), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE B.invoice.month = CONCAT(CAST(cost_data_invoice_year AS STRING), CAST(current_month_date AS STRING FORMAT('MM')))"
+        query = "DECLARE bucket_name STRING DEFAULT '${local.bucket_name}'; DECLARE current_date DATE DEFAULT CURRENT_DATE; DECLARE start_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_SUB(current_date, INTERVAL 2 MONTH), MONTH), 'US/Pacific'); DECLARE end_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_ADD(EXTRACT(DATE FROM start_date), INTERVAL 1 MONTH), MONTH), 'US/Pacific'); DECLARE bucket_path STRING DEFAULT CONCAT('gs://', bucket_name, '/', FORMAT_TIMESTAMP('%G-%m', start_date), '_backfill/*.csv'); EXPORT DATA OPTIONS (uri=(bucket_path), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE usage_start_time >= start_date AND usage_start_time < end_date AND _PARTITIONTIME >= TIMESTAMP(EXTRACT(DATE FROM start_date)) ;"
       }
     }
 
@@ -94,7 +94,7 @@ resource "google_bigquery_data_transfer_config" "query_config_5"{
       data_source_id         = "scheduled_query"
       schedule               = "None"
       params = {
-        query = "DECLARE unused STRING; DECLARE current_month_date DATE DEFAULT DATE_SUB(@run_date, INTERVAL 3 MONTH); DECLARE cost_data_invoice_month NUMERIC DEFAULT EXTRACT(MONTH FROM current_month_date); DECLARE cost_data_invoice_year NUMERIC DEFAULT EXTRACT(YEAR FROM current_month_date); EXPORT DATA OPTIONS ( uri = CONCAT('gs://${local.bucket_name}/', CAST(cost_data_invoice_year AS STRING), '-', CAST(current_month_date AS STRING FORMAT('MM')), '/*.csv'), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE B.invoice.month = CONCAT(CAST(cost_data_invoice_year AS STRING), CAST(current_month_date AS STRING FORMAT('MM')))"
+        query = "DECLARE bucket_name STRING DEFAULT '${local.bucket_name}'; DECLARE current_date DATE DEFAULT CURRENT_DATE; DECLARE start_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_SUB(current_date, INTERVAL 3 MONTH), MONTH), 'US/Pacific'); DECLARE end_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_ADD(EXTRACT(DATE FROM start_date), INTERVAL 1 MONTH), MONTH), 'US/Pacific'); DECLARE bucket_path STRING DEFAULT CONCAT('gs://', bucket_name, '/', FORMAT_TIMESTAMP('%G-%m', start_date), '_backfill/*.csv'); EXPORT DATA OPTIONS (uri=(bucket_path), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE usage_start_time >= start_date AND usage_start_time < end_date AND _PARTITIONTIME >= TIMESTAMP(EXTRACT(DATE FROM start_date)) ;"
       }     
         
 }
