@@ -70,7 +70,7 @@ resource "google_bigquery_data_transfer_config" "query_config_3"{
       data_source_id         = "scheduled_query"
       schedule               = "None"
       params = {
-        query = ""
+        query = "DECLARE bucket_name STRING DEFAULT '${local.bucket_name}'; DECLARE current_date DATE DEFAULT CURRENT_DATE; DECLARE start_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_SUB(current_date, INTERVAL 1 MONTH), MONTH), 'US/Pacific'); DECLARE end_date TIMESTAMP DEFAULT TIMESTAMP(DATE_TRUNC(DATE_ADD(EXTRACT(DATE FROM start_date), INTERVAL 1 MONTH), MONTH), 'US/Pacific'); DECLARE bucket_path STRING DEFAULT CONCAT('gs://', bucket_name, '/', FORMAT_TIMESTAMP('%G-%m', start_date), '_backfill/*.csv'); EXPORT DATA OPTIONS (uri=(bucket_path), format='JSON', overwrite=True) AS SELECT *, (SELECT STRING_AGG(display_name, '/') FROM B.project.ancestors) organization_list FROM `${var.table_id}` as B WHERE usage_start_time >= start_date AND usage_start_time < end_date AND _PARTITIONTIME >= TIMESTAMP(EXTRACT(DATE FROM start_date)) ;"
       }
     }
 
