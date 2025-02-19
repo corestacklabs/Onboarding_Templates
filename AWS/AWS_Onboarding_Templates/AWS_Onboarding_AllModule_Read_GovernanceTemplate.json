@@ -372,7 +372,8 @@
                         "tag:TagResources",
                         "waf:TagResource",
                         "workspaces:CreateTags",
-                        "workspaces:DeleteTags"
+                        "workspaces:DeleteTags",
+			"route53resolver:TagResource"
                      ],
                      "Effect":"Allow",
                      "Resource":"*"
