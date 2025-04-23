@@ -398,7 +398,8 @@
 				                        "workmail:List*",
 				                        "workspaces:Describe*",
 				                        "xray:GetGroups",
-				                        "xray:GetSamplingRules"
+				                        "xray:GetSamplingRules",
+							"s3:List*"
 						],
 						"Effect": "Allow",
 						"Resource": "*"
