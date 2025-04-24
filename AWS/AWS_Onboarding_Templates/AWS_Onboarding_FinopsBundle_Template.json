@@ -213,7 +213,14 @@
 							"compute-optimizer:GetEnrollmentStatus",
 							"compute-optimizer:GetLambdaFunctionRecommendations",
 							"compute-optimizer:GetRecommendationPreferences",
-							"compute-optimizer:GetRecommendationSummaries"
+							"compute-optimizer:GetRecommendationSummaries",
+							"ce:GetSavingsPlansPurchaseRecommendation",
+							"ce:GetSavingsPlansUtilization",
+                            "savingsplans:DescribeSavingsPlans",
+                            "cloudwatch:GetMetricData",
+                            "cloudwatch:GetMetricStatistics",
+                            "cloudwatch:ListDashboards",
+                            "cloudwatch:ListMetrics"
 						],
 						"Effect": "Allow",
 						"Resource": "*"
@@ -358,7 +365,7 @@
 				                        "s3:GetLifecycleConfiguration",
 				                        "s3:GetNotificationConfiguration",
 				                        "s3:ListAllMyBuckets",
-							"s3:ListBucket",
+							            "s3:ListBucket",
 				                        "s3:ListMultipartUploadParts",
 				                        "sagemaker:List*",
 				                        "sdb:DomainMetadata",
