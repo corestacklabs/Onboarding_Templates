@@ -8,7 +8,7 @@ terraform {
 }
 locals {
   bucket_name = "corestack-${var.project_id}"
-  api = ["compute.googleapis.com","cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com", "recommender.googleapis.com"]
+  api = ["compute.googleapis.com","cloudresourcemanager.googleapis.com", "cloudbilling.googleapis.com", "recommender.googleapis.com","serviceusage.googleapis.com","billingbudgets.googleapis.com"]
 }
 resource "google_service_account" "service_account" {
   account_id   = "corestack-auth"
