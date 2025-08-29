@@ -19,8 +19,8 @@ resource "google_service_account" "service_account" {
 resource "google_project_iam_custom_role" "my_custom_proj_role" {
   role_id     = "corestackAuthRole"
   project     = var.project_id 
-  title       = "Corestack-gcp-custom-role-test"
-  description = "Custom role for the corestack gcp module"
+  title       = "Corestack-gcp-custom-role-for-billing"
+  description = "Custom role for the corestack gcp module to fetch Billing access"
   permissions = ["storage.objects.list", "storage.objects.get", "storage.buckets.list", "storage.buckets.get", "compute.regions.get", "compute.regions.list", "compute.zones.get", "compute.zones.list", "resourcemanager.projects.get"]
 }
 resource "google_project_iam_binding" "role-binding" {
