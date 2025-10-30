@@ -172,8 +172,7 @@
 					"Statement": [{
 						"Sid": "Auth",
 						"Action": [
-							"s3:GetObject",
-							"s3:HeadBucket"
+							"s3:GetObject"
 						],
 						"Effect": "Allow",
 						"Resource": {
@@ -368,6 +367,7 @@
 				                        "s3:ListAllMyBuckets",
 							            "s3:ListBucket",
 				                        "s3:ListMultipartUploadParts",
+										"s3:HeadBucket",
 				                        "sagemaker:List*",
 				                        "sdb:DomainMetadata",
 				                        "sdb:ListDomains",
@@ -443,4 +443,5 @@
 		}
 	}
 }
+
 
