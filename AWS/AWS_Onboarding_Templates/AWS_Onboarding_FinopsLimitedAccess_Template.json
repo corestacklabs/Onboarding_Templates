@@ -186,8 +186,7 @@
 					"Statement": [{
 						"Sid": "Auth",
 						"Action": [
-							"s3:GetObject",
-							"s3:HeadBucket"
+							"s3:GetObject"
 						],
 						"Effect": "Allow",
 						"Resource": {
@@ -449,6 +448,7 @@
 							"s3:GetBucketTagging",
 							"s3:ListBucket",
 							"s3:ListAllMyBuckets",
+							"s3:HeadBucket",
 							"workspaces:DescribeWorkspaceBundles",
 							"workspaces:DescribeWorkspaceDirectories",
 							"workspaces:DescribeWorkspaceImages",
@@ -489,3 +489,4 @@
 	}
 
 }
+
