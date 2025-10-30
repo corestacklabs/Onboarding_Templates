@@ -170,7 +170,8 @@
 					"Statement": [{
 						"Sid": "Auth",
 						"Action": [
-							"s3:GetObject"
+							"s3:GetObject",
+							"s3:HeadBucket"
 						],
 						"Effect": "Allow",
 						"Resource": {
@@ -463,4 +464,5 @@
 			}
 		}
 	}
+
 }
