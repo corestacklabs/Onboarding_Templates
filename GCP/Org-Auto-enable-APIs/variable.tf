@@ -14,11 +14,7 @@ variable "region" {
   # No default - must be set to a region allowed by org policy
 }
 
-variable "location_id" {
-  description = "Firestore database location (e.g., nam5, asia-south1)"
-  type        = string
-  default     = "nam5"
-}
+
 
 variable "scheduler_time_zone" {
   description = "IANA time zone for the scheduler"

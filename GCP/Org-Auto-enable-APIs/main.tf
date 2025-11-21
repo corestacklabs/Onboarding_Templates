@@ -37,7 +37,7 @@ resource "random_id" "db_suffix" {
 resource "google_firestore_database" "state" {
   project     = var.project_id
   name        = "org-autoconfig-${random_id.db_suffix.hex}"
-  location_id = var.location_id
+  location_id = var.region
   type        = "FIRESTORE_NATIVE"
 }
 
