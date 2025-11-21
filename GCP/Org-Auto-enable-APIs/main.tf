@@ -61,6 +61,13 @@ resource "google_organization_iam_member" "serviceusage_admin" {
   member = "serviceAccount:${google_service_account.sa.email}"
 }
 
+# Grant Firestore access to service account
+resource "google_project_iam_member" "firestore_user" {
+  project = var.project_id
+  role    = "roles/datastore.user"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
 # ---------- Pub/Sub topic ----------
 resource "google_pubsub_topic" "topic" {
   name    = "org-project-scan"

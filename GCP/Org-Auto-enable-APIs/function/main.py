@@ -1,7 +1,10 @@
-import os, json
+import os, json, logging
 from google.cloud import firestore
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 ORG_ID = os.environ["ORG_ID"]
 STATE_COLLECTION = os.environ.get("STATE_COLLECTION", "org-inventory")
@@ -42,26 +45,48 @@ def _enable_api(project_id: str, api: str):
         return {"project": project_id, "api": api, "error": str(e)}
 
 def entrypoint(event, context=None):
-    db = firestore.Client(database=FIRESTORE_DB)
-    doc_ref = db.collection(STATE_COLLECTION).document(STATE_DOC)
-    snap = doc_ref.get()
+    try:
+        logger.info(f"Starting function execution. Using Firestore database: {FIRESTORE_DB}")
+        
+        # Initialize Firestore client with custom database
+        db = firestore.Client(database=FIRESTORE_DB)
+        logger.info("Firestore client initialized successfully")
+        
+        doc_ref = db.collection(STATE_COLLECTION).document(STATE_DOC)
+        snap = doc_ref.get()
+        logger.info(f"Retrieved state document. Exists: {snap.exists}")
 
-    current_projects = _get_all_projects_in_org()
-    seen_projects = set(snap.to_dict().get("project_ids", [])) if snap.exists else set()
+        current_projects = _get_all_projects_in_org()
+        logger.info(f"Found {len(current_projects)} active projects in org")
+        
+        seen_projects = set(snap.to_dict().get("project_ids", [])) if snap.exists else set()
+        logger.info(f"Found {len(seen_projects)} previously seen projects")
 
-    new_projects = sorted(list(current_projects - seen_projects))
+        new_projects = sorted(list(current_projects - seen_projects))
+        logger.info(f"Found {len(new_projects)} new projects: {new_projects}")
 
-    results = []
-    for pid in new_projects:
-        for api in TARGET_APIS:
-            results.append(_enable_api(pid, api))
+        results = []
+        for pid in new_projects:
+            for api in TARGET_APIS:
+                results.append(_enable_api(pid, api))
 
-    # Update baseline so next run only handles truly new projects
-    doc_ref.set({"project_ids": sorted(list(current_projects))})
+        # Update baseline so next run only handles truly new projects
+        doc_ref.set({"project_ids": sorted(list(current_projects))})
+        logger.info("Updated state document with current projects")
 
-    return json.dumps({
-        "examined": len(current_projects),
-        "new_projects": new_projects,
-        "enabled_apis": TARGET_APIS,
-        "results_sample": results[:30]
-    })
+        response = {
+            "examined": len(current_projects),
+            "new_projects": new_projects,
+            "enabled_apis": TARGET_APIS,
+            "results_sample": results[:30]
+        }
+        
+        logger.info("Function execution completed successfully")
+        return json.dumps(response)
+        
+    except Exception as e:
+        logger.error(f"Error in entrypoint: {str(e)}", exc_info=True)
+        return json.dumps({
+            "error": str(e),
+            "type": type(e).__name__
+        })
