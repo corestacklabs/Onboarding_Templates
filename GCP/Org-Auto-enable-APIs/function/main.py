@@ -1,10 +1,14 @@
 import os, json, logging
+import httplib2
 from google.cloud import firestore
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Configure HTTP client with timeout to avoid warnings
+_http = httplib2.Http(timeout=60)
 
 ORG_ID = os.environ["ORG_ID"]
 STATE_COLLECTION = os.environ.get("STATE_COLLECTION", "org-inventory")
@@ -22,7 +26,7 @@ TARGET_APIS = [
 ]
 
 def _get_all_projects_in_org():
-    crm = build("cloudresourcemanager", "v1")
+    crm = build("cloudresourcemanager", "v1", http=_http)
     request = crm.projects().list()
     projects = []
     while request is not None:
@@ -36,7 +40,7 @@ def _get_all_projects_in_org():
     return set(projects)
 
 def _enable_api(project_id: str, api: str):
-    svc = build("serviceusage", "v1")
+    svc = build("serviceusage", "v1", http=_http)
     name = f"projects/{project_id}/services/{api}"
     try:
         svc.services().enable(name=name, body={}).execute()
