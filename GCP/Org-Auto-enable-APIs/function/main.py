@@ -1,14 +1,17 @@
 import os, json, logging
 import httplib2
+from google.auth import default
 from google.cloud import firestore
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google_auth_httplib2 import AuthorizedHttp
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configure HTTP client with timeout to avoid warnings
-_http = httplib2.Http(timeout=60)
+# Get default credentials and create authorized HTTP client with timeout
+_credentials, _ = default()
+_http = AuthorizedHttp(_credentials, http=httplib2.Http(timeout=60))
 
 ORG_ID = os.environ["ORG_ID"]
 STATE_COLLECTION = os.environ.get("STATE_COLLECTION", "org-inventory")
