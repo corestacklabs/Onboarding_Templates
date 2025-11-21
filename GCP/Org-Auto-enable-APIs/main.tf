@@ -135,6 +135,7 @@ resource "google_project_iam_member" "eventarc_sa_token_creator" {
 # ---------- Cloud Scheduler job ----------
 resource "google_cloud_scheduler_job" "daily" {
   name        = "daily-org-scan"
+  region      = var.region
   schedule    = var.scheduler_cron
   time_zone   = var.scheduler_time_zone
   description = "Publish a message daily to trigger org project API enablement for new projects"
