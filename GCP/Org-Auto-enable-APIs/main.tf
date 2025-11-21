@@ -41,7 +41,7 @@ resource "google_service_account" "sa" {
 # ---------- Org-level IAM for SA ----------
 resource "google_organization_iam_member" "viewer" {
   org_id = var.org_id
-  role   = "roles/resourcemanager.projectViewer"
+  role   = "roles/browser"
   member = "serviceAccount:${google_service_account.sa.email}"
 }
 

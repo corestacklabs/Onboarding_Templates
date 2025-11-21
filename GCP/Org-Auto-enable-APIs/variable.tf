@@ -9,9 +9,9 @@ variable "org_id" {
 }
 
 variable "region" {
-  description = "Region for Cloud Functions / Eventarc"
+  description = "Region for Cloud Functions / Eventarc (must comply with organization resource location constraints)"
   type        = string
-  default     = "us-central1"
+  # No default - must be set to a region allowed by org policy
 }
 
 variable "location_id" {
