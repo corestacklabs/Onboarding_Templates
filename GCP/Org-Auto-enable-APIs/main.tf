@@ -44,7 +44,7 @@ resource "google_firestore_database" "state" {
 # ---------- Service Account ----------
 resource "google_service_account" "sa" {
   project      = var.project_id
-  account_id   = "sa-project-autoconfig"
+  account_id   = "sa-project-autoconfig-${random_id.suffix.hex}"
   display_name = "Org Project Auto-config"
 }
 
@@ -70,7 +70,7 @@ resource "google_project_iam_member" "firestore_user" {
 
 # ---------- Pub/Sub topic ----------
 resource "google_pubsub_topic" "topic" {
-  name    = "org-project-scan"
+  name    = "org-project-scan-${random_id.suffix.hex}"
   project = var.project_id
 }
 
@@ -98,7 +98,7 @@ resource "google_storage_bucket_object" "zip" {
 
 # ---------- Cloud Function (2nd gen) w/ Pub/Sub trigger ----------
 resource "google_cloudfunctions2_function" "function" {
-  name     = "org-project-autoconfig"
+  name     = "org-project-autoconfig-${random_id.suffix.hex}"
   location = var.region
 
   build_config {
@@ -149,7 +149,7 @@ resource "google_project_iam_member" "eventarc_sa_token_creator" {
 
 # ---------- Cloud Scheduler job ----------
 resource "google_cloud_scheduler_job" "daily" {
-  name        = "daily-org-scan"
+  name        = "daily-org-scan-${random_id.suffix.hex}"
   region      = var.region
   schedule    = var.scheduler_cron
   time_zone   = var.scheduler_time_zone
