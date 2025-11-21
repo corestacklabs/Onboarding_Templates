@@ -28,14 +28,8 @@ variable "scheduler_cron" {
   default     = "0 9 * * *" # 09:00 IST
 }
 
-variable "state_collection" {
-  description = "Firestore collection for state"
+variable "state_file" {
+  description = "Cloud Storage file path for state (e.g., org-inventory/projects-seen.json)"
   type        = string
-  default     = "org-inventory"
-}
-
-variable "state_doc" {
-  description = "Firestore document name for seen projects"
-  type        = string
-  default     = "projects-seen"
+  default     = "org-inventory/projects-seen.json"
 }

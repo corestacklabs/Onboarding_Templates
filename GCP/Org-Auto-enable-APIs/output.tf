@@ -15,12 +15,12 @@ output "service_account_email" {
   value = google_service_account.sa.email
 }
 
-output "firestore_database_name" {
-  description = "Firestore database name (use this to find your data in Firestore console)"
-  value       = google_firestore_database.state.name
+output "state_bucket_name" {
+  description = "Cloud Storage bucket name where state is stored"
+  value       = google_storage_bucket.state.name
 }
 
-output "firestore_collection_path" {
-  description = "Full path to the Firestore collection where state is stored"
-  value       = "${var.state_collection}/${var.state_doc}"
+output "state_file_path" {
+  description = "Full path to the state file in Cloud Storage"
+  value       = "gs://${google_storage_bucket.state.name}/${var.state_file}"
 }

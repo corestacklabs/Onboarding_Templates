@@ -1,7 +1,8 @@
 import os
 import json
 import logging
-from google.cloud import firestore
+from datetime import datetime
+from google.cloud import storage
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import google.auth
@@ -11,9 +12,8 @@ logger = logging.getLogger(__name__)
 
 # Environment variables
 ORG_ID = os.environ["ORG_ID"]
-STATE_COLLECTION = os.environ.get("STATE_COLLECTION", "org-inventory")
-STATE_DOC = os.environ.get("STATE_DOC", "projects-seen")
-FIRESTORE_DB = os.environ.get("FIRESTORE_DB", "(default)")
+STATE_BUCKET = os.environ["STATE_BUCKET"]
+STATE_FILE = os.environ.get("STATE_FILE", "org-inventory/projects-seen.json")
 
 # APIs to enable for new projects
 TARGET_APIS = [
@@ -144,31 +144,71 @@ def _enable_api(project_id: str, api: str, max_retries=2):
             return {"project": project_id, "api": api, "status": "FAILED", "error": error_msg}
 
 
+def _load_state_from_storage():
+    """Load state from Cloud Storage."""
+    try:
+        client = storage.Client()
+        bucket = client.bucket(STATE_BUCKET)
+        blob = bucket.blob(STATE_FILE)
+        
+        if blob.exists():
+            content = blob.download_as_text()
+            state_data = json.loads(content)
+            logger.info(f"Loaded state from {STATE_BUCKET}/{STATE_FILE}")
+            return set(state_data.get("project_ids", []))
+        else:
+            logger.info(f"State file {STATE_BUCKET}/{STATE_FILE} does not exist, starting fresh")
+            return set()
+    except Exception as e:
+        logger.warning(f"Failed to load state from storage: {str(e)}, starting fresh")
+        return set()
+
+
+def _save_state_to_storage(project_ids):
+    """Save state to Cloud Storage."""
+    try:
+        client = storage.Client()
+        bucket = client.bucket(STATE_BUCKET)
+        blob = bucket.blob(STATE_FILE)
+        
+        project_list = sorted(list(project_ids))
+        state_data = {
+            "project_ids": project_list,
+            "last_updated": datetime.utcnow().isoformat() + "Z",
+            "total_projects": len(project_list)
+        }
+        
+        blob.upload_from_string(
+            json.dumps(state_data, indent=2),
+            content_type="application/json"
+        )
+        logger.info(f"Successfully wrote {len(project_list)} projects to {STATE_BUCKET}/{STATE_FILE}")
+        
+        # Verify the write
+        if blob.exists():
+            verify_content = blob.download_as_text()
+            verify_data = json.loads(verify_content)
+            logger.info(f"Verified: State file exists with {len(verify_data.get('project_ids', []))} projects")
+        else:
+            logger.warning("Warning: State file write verification failed")
+    except Exception as e:
+        logger.error(f"Failed to write state to storage: {str(e)}", exc_info=True)
+        raise
+
+
 def entrypoint(event, context=None):
     """Main entry point for the Cloud Function."""
     try:
-        logger.info(f"Starting function execution. Using Firestore database: {FIRESTORE_DB}")
-        logger.info(f"Firestore collection: {STATE_COLLECTION}, document: {STATE_DOC}")
+        logger.info(f"Starting function execution. Using state bucket: {STATE_BUCKET}")
+        logger.info(f"State file: {STATE_FILE}")
         
-        # Initialize Firestore client
-        db = firestore.Client(database=FIRESTORE_DB)
-        logger.info("Firestore client initialized successfully")
-        
-        # Get state document
-        doc_ref = db.collection(STATE_COLLECTION).document(STATE_DOC)
-        snap = doc_ref.get()
-        logger.info(f"Retrieved state document. Exists: {snap.exists}")
-        
-        if snap.exists:
-            logger.info(f"Existing document data: {snap.to_dict()}")
+        # Load previously seen projects from Cloud Storage
+        seen_projects = _load_state_from_storage()
+        logger.info(f"Found {len(seen_projects)} previously seen projects")
         
         # Get all projects in org
         current_projects = _get_all_projects_in_org()
         logger.info(f"Found {len(current_projects)} active projects in org")
-        
-        # Get previously seen projects
-        seen_projects = set(snap.to_dict().get("project_ids", [])) if snap.exists else set()
-        logger.info(f"Found {len(seen_projects)} previously seen projects")
         
         # Find new projects
         new_projects = sorted(list(current_projects - seen_projects))
@@ -182,27 +222,8 @@ def entrypoint(event, context=None):
                 result = _enable_api(pid, api)
                 results.append(result)
         
-        # Update state document with current projects
-        project_list = sorted(list(current_projects))
-        state_data = {
-            "project_ids": project_list,
-            "last_updated": firestore.SERVER_TIMESTAMP,
-            "total_projects": len(project_list)
-        }
-        
-        try:
-            doc_ref.set(state_data)
-            logger.info(f"Successfully wrote {len(project_list)} projects to Firestore")
-            
-            # Verify the write by reading it back
-            verify_snap = doc_ref.get()
-            if verify_snap.exists:
-                logger.info(f"Verified: Firestore document exists with {len(verify_snap.to_dict().get('project_ids', []))} projects")
-            else:
-                logger.warning("Warning: Firestore document write verification failed - document does not exist")
-        except Exception as e:
-            logger.error(f"Failed to write to Firestore: {str(e)}", exc_info=True)
-            raise
+        # Save updated state to Cloud Storage
+        _save_state_to_storage(current_projects)
         
         # Prepare response
         response = {

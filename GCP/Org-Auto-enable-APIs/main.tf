@@ -12,7 +12,7 @@ resource "google_project_service" "apis" {
     "run.googleapis.com",
     "pubsub.googleapis.com",
     "cloudscheduler.googleapis.com",
-    "firestore.googleapis.com",
+    "storage.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "serviceusage.googleapis.com",
     "artifactregistry.googleapis.com",
@@ -28,17 +28,17 @@ resource "random_id" "suffix" {
   byte_length = 3
 }
 
-resource "random_id" "db_suffix" {
-  byte_length = 4
-}
-
-
-# ---------- Firestore (Native) for state ----------
-resource "google_firestore_database" "state" {
-  project     = var.project_id
-  name        = "org-autoconfig-${random_id.db_suffix.hex}"
-  location_id = var.region
-  type        = "FIRESTORE_NATIVE"
+# ---------- Cloud Storage bucket for state ----------
+resource "google_storage_bucket" "state" {
+  name                        = "${var.project_id}-org-state-${random_id.suffix.hex}"
+  project                     = var.project_id
+  location                    = var.region
+  uniform_bucket_level_access = true
+  force_destroy               = true
+  
+  versioning {
+    enabled = true
+  }
 }
 
 # ---------- Service Account ----------
@@ -61,11 +61,11 @@ resource "google_organization_iam_member" "serviceusage_admin" {
   member = "serviceAccount:${google_service_account.sa.email}"
 }
 
-# Grant Firestore access to service account
-resource "google_project_iam_member" "firestore_user" {
-  project = var.project_id
-  role    = "roles/datastore.user"
-  member  = "serviceAccount:${google_service_account.sa.email}"
+# Grant Storage access to service account
+resource "google_storage_bucket_iam_member" "state_writer" {
+  bucket = google_storage_bucket.state.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.sa.email}"
 }
 
 # ---------- Pub/Sub topic ----------
@@ -119,10 +119,9 @@ resource "google_cloudfunctions2_function" "function" {
     timeout_seconds       = 60
     service_account_email = google_service_account.sa.email
     environment_variables = {
-      ORG_ID           = var.org_id
-      STATE_COLLECTION = var.state_collection
-      STATE_DOC        = var.state_doc
-      FIRESTORE_DB     = google_firestore_database.state.name
+      ORG_ID      = var.org_id
+      STATE_BUCKET = google_storage_bucket.state.name
+      STATE_FILE   = var.state_file
     }
     ingress_settings = "ALLOW_INTERNAL_AND_GCLB"
   }
@@ -136,7 +135,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   depends_on = [
     google_project_service.apis,
-    google_firestore_database.state
+    google_storage_bucket.state
   ]
 }
 
