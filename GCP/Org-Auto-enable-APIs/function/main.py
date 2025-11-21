@@ -6,6 +6,7 @@ from googleapiclient.errors import HttpError
 ORG_ID = os.environ["ORG_ID"]
 STATE_COLLECTION = os.environ.get("STATE_COLLECTION", "org-inventory")
 STATE_DOC = os.environ.get("STATE_DOC", "projects-seen")
+FIRESTORE_DB = os.environ.get("FIRESTORE_DB", "(default)")
 
 # APIs to enable for new projects
 TARGET_APIS = [
@@ -41,7 +42,7 @@ def _enable_api(project_id: str, api: str):
         return {"project": project_id, "api": api, "error": str(e)}
 
 def entrypoint(event, context=None):
-    db = firestore.Client()
+    db = firestore.Client(database=FIRESTORE_DB)
     doc_ref = db.collection(STATE_COLLECTION).document(STATE_DOC)
     snap = doc_ref.get()
 

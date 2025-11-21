@@ -23,10 +23,20 @@ resource "google_project_service" "apis" {
   service = each.key
 }
 
+
+resource "random_id" "suffix" {
+  byte_length = 3
+}
+
+resource "random_id" "db_suffix" {
+  byte_length = 4
+}
+
+
 # ---------- Firestore (Native) for state ----------
-resource "google_firestore_database" "default" {
+resource "google_firestore_database" "state" {
   project     = var.project_id
-  name        = "(default)"
+  name        = "org-autoconfig-${random_id.db_suffix.hex}"
   location_id = var.location_id
   type        = "FIRESTORE_NATIVE"
 }
@@ -64,9 +74,6 @@ data "archive_file" "function_zip" {
   source_dir  = "${path.module}/function"
 }
 
-resource "random_id" "suffix" {
-  byte_length = 3
-}
 
 resource "google_storage_bucket" "code" {
   name                        = "${var.project_id}-functions-code-${random_id.suffix.hex}"
@@ -108,6 +115,7 @@ resource "google_cloudfunctions2_function" "function" {
       ORG_ID           = var.org_id
       STATE_COLLECTION = var.state_collection
       STATE_DOC        = var.state_doc
+      FIRESTORE_DB     = google_firestore_database.state.name
     }
     ingress_settings = "ALLOW_INTERNAL_AND_GCLB"
   }
@@ -121,7 +129,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   depends_on = [
     google_project_service.apis,
-    google_firestore_database.default
+    google_firestore_database.state
   ]
 }
 
