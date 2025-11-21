@@ -25,37 +25,38 @@ TARGET_APIS = [
     "serviceusage.googleapis.com",
 ]
 
-# Cache for API clients
-_crm_client = None
-_serviceusage_client = None
+# Cache for credentials only (not clients)
+_credentials = None
+
+
+def _get_credentials():
+    """Get default credentials."""
+    global _credentials
+    if _credentials is None:
+        _credentials, _ = google.auth.default()
+    return _credentials
 
 
 def _get_crm_client():
-    """Get or create Cloud Resource Manager client."""
-    global _crm_client
-    if _crm_client is None:
-        credentials, project = google.auth.default()
-        _crm_client = build(
-            "cloudresourcemanager",
-            "v1",
-            credentials=credentials,
-            cache_discovery=False
-        )
-    return _crm_client
+    """Create a fresh Cloud Resource Manager client."""
+    credentials = _get_credentials()
+    return build(
+        "cloudresourcemanager",
+        "v1",
+        credentials=credentials,
+        cache_discovery=False
+    )
 
 
 def _get_serviceusage_client():
-    """Get or create Service Usage client."""
-    global _serviceusage_client
-    if _serviceusage_client is None:
-        credentials, project = google.auth.default()
-        _serviceusage_client = build(
-            "serviceusage",
-            "v1",
-            credentials=credentials,
-            cache_discovery=False
-        )
-    return _serviceusage_client
+    """Create a fresh Service Usage client."""
+    credentials = _get_credentials()
+    return build(
+        "serviceusage",
+        "v1",
+        credentials=credentials,
+        cache_discovery=False
+    )
 
 
 def _get_all_projects_in_org():
@@ -80,25 +81,74 @@ def _get_all_projects_in_org():
     return set(projects)
 
 
-def _enable_api(project_id: str, api: str):
-    """Enable an API for a project."""
-    svc = _get_serviceusage_client()
+def _enable_api(project_id: str, api: str, max_retries=2):
+    """Enable an API for a project with retry logic."""
     name = f"projects/{project_id}/services/{api}"
     
-    try:
-        svc.services().enable(name=name, body={}).execute()
-        logger.info(f"Enabled {api} for project {project_id}")
-        return {"project": project_id, "api": api, "status": "REQUESTED"}
-    except HttpError as e:
-        error_msg = f"HTTP {e.resp.status}: {e.content.decode() if e.content else str(e)}"
-        logger.warning(f"Failed to enable {api} for {project_id}: {error_msg}")
-        return {"project": project_id, "api": api, "error": error_msg}
+    for attempt in range(max_retries + 1):
+        try:
+            # Create a fresh client for each attempt to avoid connection issues
+            svc = _get_serviceusage_client()
+            svc.services().enable(name=name, body={}).execute()
+            logger.info(f"Enabled {api} for project {project_id}")
+            return {"project": project_id, "api": api, "status": "REQUESTED"}
+        except HttpError as e:
+            error_content = e.content.decode() if e.content else ""
+            error_status = e.resp.status if hasattr(e, 'resp') else None
+            
+            # Check if this is a billing-related error (don't retry)
+            is_billing_error = (
+                "billing" in error_content.lower() or
+                "BILLING_NOT_OPEN" in error_content or
+                "FAILED_PRECONDITION" in error_content
+            )
+            
+            # Check if this is a permission/access error (don't retry)
+            is_permission_error = (
+                error_status == 403 or
+                "PERMISSION_DENIED" in error_content or
+                "access denied" in error_content.lower()
+            )
+            
+            # Don't retry for billing or permission errors
+            if is_billing_error or is_permission_error:
+                status = "SKIPPED_BILLING_REQUIRED" if is_billing_error else "SKIPPED_PERMISSION_DENIED"
+                logger.info(f"Skipped {api} for {project_id}: {'Billing not enabled' if is_billing_error else 'Permission denied'}")
+                return {
+                    "project": project_id,
+                    "api": api,
+                    "status": status,
+                    "error": f"HTTP {error_status}: {error_content[:200]}" if error_content else str(e)
+                }
+            
+            # For other errors, retry if attempts remain
+            if attempt < max_retries:
+                logger.warning(f"Attempt {attempt + 1} failed for {api} in {project_id}, retrying...")
+                continue
+            else:
+                error_msg = f"HTTP {error_status}: {error_content[:200]}" if error_content else str(e)
+                logger.warning(f"Failed to enable {api} for {project_id} after {max_retries + 1} attempts: {error_msg}")
+                return {"project": project_id, "api": api, "status": "FAILED", "error": error_msg}
+        except (AttributeError, ValueError) as e:
+            # Connection/parsing errors - retry
+            if attempt < max_retries:
+                logger.warning(f"Attempt {attempt + 1} failed for {api} in {project_id} (connection error), retrying...")
+                continue
+            else:
+                error_msg = str(e)
+                logger.warning(f"Failed to enable {api} for {project_id} after {max_retries + 1} attempts: {error_msg}")
+                return {"project": project_id, "api": api, "status": "FAILED", "error": error_msg}
+        except Exception as e:
+            error_msg = str(e)
+            logger.warning(f"Unexpected error enabling {api} for {project_id}: {error_msg}")
+            return {"project": project_id, "api": api, "status": "FAILED", "error": error_msg}
 
 
 def entrypoint(event, context=None):
     """Main entry point for the Cloud Function."""
     try:
         logger.info(f"Starting function execution. Using Firestore database: {FIRESTORE_DB}")
+        logger.info(f"Firestore collection: {STATE_COLLECTION}, document: {STATE_DOC}")
         
         # Initialize Firestore client
         db = firestore.Client(database=FIRESTORE_DB)
@@ -108,6 +158,9 @@ def entrypoint(event, context=None):
         doc_ref = db.collection(STATE_COLLECTION).document(STATE_DOC)
         snap = doc_ref.get()
         logger.info(f"Retrieved state document. Exists: {snap.exists}")
+        
+        if snap.exists:
+            logger.info(f"Existing document data: {snap.to_dict()}")
         
         # Get all projects in org
         current_projects = _get_all_projects_in_org()
@@ -130,8 +183,26 @@ def entrypoint(event, context=None):
                 results.append(result)
         
         # Update state document with current projects
-        doc_ref.set({"project_ids": sorted(list(current_projects))})
-        logger.info("Updated state document with current projects")
+        project_list = sorted(list(current_projects))
+        state_data = {
+            "project_ids": project_list,
+            "last_updated": firestore.SERVER_TIMESTAMP,
+            "total_projects": len(project_list)
+        }
+        
+        try:
+            doc_ref.set(state_data)
+            logger.info(f"Successfully wrote {len(project_list)} projects to Firestore")
+            
+            # Verify the write by reading it back
+            verify_snap = doc_ref.get()
+            if verify_snap.exists:
+                logger.info(f"Verified: Firestore document exists with {len(verify_snap.to_dict().get('project_ids', []))} projects")
+            else:
+                logger.warning("Warning: Firestore document write verification failed - document does not exist")
+        except Exception as e:
+            logger.error(f"Failed to write to Firestore: {str(e)}", exc_info=True)
+            raise
         
         # Prepare response
         response = {

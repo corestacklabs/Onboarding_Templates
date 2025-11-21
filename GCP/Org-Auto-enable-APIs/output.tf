@@ -14,3 +14,13 @@ output "pubsub_topic" {
 output "service_account_email" {
   value = google_service_account.sa.email
 }
+
+output "firestore_database_name" {
+  description = "Firestore database name (use this to find your data in Firestore console)"
+  value       = google_firestore_database.state.name
+}
+
+output "firestore_collection_path" {
+  description = "Full path to the Firestore collection where state is stored"
+  value       = "${var.state_collection}/${var.state_doc}"
+}
