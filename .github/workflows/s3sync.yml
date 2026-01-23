@@ -53,4 +53,52 @@ jobs:
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_Full_ReadOnly_role.json --acl public-read
         aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_Full_ReadOnly_WAF.json s3://$aws_s3_bucket/
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_Full_ReadOnly_WAF.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_secops_write_770439906488.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_secops_write_770439906488.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_secops_write_681410986374.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_secops_write_681410986374.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_secops_write_028811834831.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_secops_write_028811834831.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_secops_readonly_770439906488.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_secops_readonly_770439906488.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_secops_readonly_681410986374.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_secops_readonly_681410986374.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_secops_readonly_028811834831.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_secops_readonly_028811834831.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_finops_write_770439906488.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_finops_write_770439906488.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_finops_write_028811834831.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_finops_write_028811834831.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_finops_write_681410986374.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_finops_write_681410986374.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_cloudops_write_770439906488.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_cloudops_write_770439906488.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_cloudops_write_681410986374.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_cloudops_write_681410986374.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_write_770439906488.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_write_770439906488.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_cloudops_write_028811834831.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_cloudops_write_028811834831.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_write_681410986374.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_write_681410986374.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_readonly_770439906488.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_readonly_770439906488.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_write_028811834831.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_write_028811834831.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_readonly_681410986374.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_readonly_681410986374.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_assessment_readonly_770439906488.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_assessment_readonly_770439906488.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_readonly_028811834831.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_readonly_028811834831.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_assessment_readonly_681410986374.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_assessment_readonly_681410986374.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_allproduct_assessment_readonly_028811834831.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_allproduct_assessment_readonly_028811834831.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_finops_readonly_770439906488.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_finops_readonly_770439906488.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_finops_readonly_681410986374.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_finops_readonly_681410986374.json --acl public-read
+        aws s3 cp AWS/AWS_Onboarding_Templates/corestack_finops_readonly_028811834831.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_finops_readonly_028811834831.json --acl public-read
         
