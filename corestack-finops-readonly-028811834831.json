@@ -1,0 +1,313 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CoreStack FinOps \u2013 FULL MERGED IAM Role with all policies",
+  "Parameters": {
+    "AWSCostAndUsageReportCURBucketName": {
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "^[a-z0-9\\.\\-\\_]*$"
+    },
+    "EnforceMFA": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    }
+  },
+  "Conditions": {
+    "IncludeMFACondition": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnforceMFA"
+        },
+        "true"
+      ]
+    },
+    "BucketNotEmpty": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWSCostAndUsageReportCURBucketName"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "CoreStackRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "corestack-access-role",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "arn:aws:iam::028811834831:root"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "Fn::If": [
+                  "IncludeMFACondition",
+                  {
+                    "StringEquals": {
+                      "sts:ExternalId": "corestack-access"
+                    },
+                    "Bool": {
+                      "aws:MultiFactorAuthPresent": "true"
+                    }
+                  },
+                  {
+                    "StringEquals": {
+                      "sts:ExternalId": "corestack-access"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Purpose",
+            "Value": "CoreStack"
+          }
+        ]
+      }
+    },
+    "BudgetBillingPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "CoreStack_BudgetAndBillingPolicy",
+        "Roles": [
+          {
+            "Ref": "CoreStackRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "budgets:ViewBudget",
+                "budgets:DescribeBudgetActionHistories",
+                "budgets:DescribeBudgetActionsForAccount"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "SupportRIPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "CoreStack_SupportAndRIPolicy",
+        "Roles": [
+          {
+            "Ref": "CoreStackRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ce:GetReservationPurchaseRecommendation",
+                "ce:GetReservationUtilization",
+                "ce:DescribeNotificationSubscription",
+                "ce:GetReservationCoverage",
+                "support:DescribeServices",
+                "support:DescribeSupportLevel",
+                "support:DescribeTrustedAdvisorCheckResult",
+                "support:DescribeTrustedAdvisorChecks"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "ComputeOptimizerPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "CoreStack_ComputeOptimizerPolicy",
+        "Roles": [
+          {
+            "Ref": "CoreStackRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "compute-optimizer:DescribeRecommendationExportJobs",
+                "compute-optimizer:GetAutoScalingGroupRecommendations",
+                "compute-optimizer:GetEBSVolumeRecommendations",
+                "compute-optimizer:GetEC2InstanceRecommendations",
+                "compute-optimizer:GetEC2RecommendationProjectedMetrics",
+                "compute-optimizer:GetECSServiceRecommendationProjectedMetrics",
+                "compute-optimizer:GetECSServiceRecommendations",
+                "compute-optimizer:GetEffectiveRecommendationPreferences",
+                "compute-optimizer:GetEnrollmentStatus",
+                "compute-optimizer:GetLambdaFunctionRecommendations",
+                "compute-optimizer:GetRecommendationPreferences",
+                "compute-optimizer:GetRecommendationSummaries",
+                "ce:GetSavingsPlansPurchaseRecommendation",
+                "ce:GetSavingsPlansUtilization",
+                "savingsplans:DescribeSavingsPlans",
+                "cloudwatch:GetMetricData",
+                "cloudwatch:GetMetricStatistics",
+                "cloudwatch:ListDashboards",
+                "cloudwatch:ListMetrics"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "InventoryFinopsReadPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "CoreStack_InventoryFinopsReadPolicy",
+        "Roles": [
+          {
+            "Ref": "CoreStackRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "access-analyzer:List*",
+                "acm:DescribeCertificate",
+                "acm:GetCertificate",
+                "acm:ListCertificates",
+                "acm:ListTagsForCertificate",
+                "apigateway:GET",
+                "application-autoscaling:DescribeScheduledActions",
+                "appstream:Describe*",
+                "appstream:ListAssociatedFleets",
+                "appstream:ListAssociatedStacks",
+                "appsync:ListGraphqlApis",
+                "athena:List*",
+                "autoscaling:Describe*",
+                "backup:GetBackupPlan",
+                "backup:ListBackupJobs",
+                "backup:ListBackupVaults",
+                "batch:Describe*",
+                "cloudformation:DescribeStacks",
+                "cloudformation:GetStackPolicy",
+                "cloudformation:GetTemplate",
+                "cloudformation:ListStackResources",
+                "cloudformation:ListStacks",
+                "cloudfront:Get*",
+                "cloudfront:List*",
+                "cloudhsm:Describe*",
+                "cloudhsm:List*",
+                "cloudsearch:DescribeDomains",
+                "codeartifact:DescribeDomain",
+                "codeartifact:ListDomains",
+                "codebuild:ListProjects",
+                "codepipeline:List",
+                "dynamodb:Describe*",
+                "dynamodb:List*",
+                "ec2:Describe*",
+                "ecs:Describe*",
+                "ecs:List*",
+                "eks:Describe*",
+                "eks:List*",
+                "elasticache:Describe*",
+                "elasticfilesystem:Describe*",
+                "elasticloadbalancing:Describe*",
+                "es:Describe*",
+                "es:ListDomainNames",
+                "fsx:DescribeFileSystems",
+                "glue:Get*",
+                "glue:List*",
+                "iam:SimulatePrincipalPolicy",
+                "lambda:Get*",
+                "lambda:List*",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams",
+                "logs:GetLogEvents",
+                "organizations:Describe*",
+                "organizations:List*",
+                "rds:Describe*",
+                "rds:List*",
+                "route53:List*",
+                "s3:ListAllMyBuckets",
+                "s3:ListBucket",
+                "s3:GetEncryptionConfiguration",
+                "secretsmanager:Describe*",
+                "secretsmanager:List*",
+                "sns:List*",
+                "sqs:List*",
+                "ssm:Describe*",
+                "ssm:Get*",
+                "ssm:List*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "AWSCURAccessPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Condition": "BucketNotEmpty",
+      "Properties": {
+        "PolicyName": "CoreStack_AWSCURAccessPolicy",
+        "Roles": [
+          {
+            "Ref": "CoreStackRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "AWSCostAndUsageReportCURBucketName"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "RoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "CoreStackRole",
+          "Arn"
+        ]
+      }
+    },
+    "ExternalId": {
+      "Value": "corestack-access"
+    }
+  }
+}
