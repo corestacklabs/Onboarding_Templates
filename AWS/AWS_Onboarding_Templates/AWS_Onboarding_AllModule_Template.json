@@ -501,6 +501,8 @@
                         "s3:GetNotificationConfiguration",
                         "s3:ListAllMyBuckets",
                         "s3:ListMultipartUploadParts",
+						"s3:ListStorageLensConfigurations",
+						"s3:GetStorageLensConfiguration", 
                         "sagemaker:List*",
                         "sdb:DomainMetadata",
                         "sdb:ListDomains",
