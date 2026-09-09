@@ -362,6 +362,7 @@
 				                        "s3:GetEncryptionConfiguration",
 				                        "s3:GetLifecycleConfiguration",
 				                        "s3:GetNotificationConfiguration",
+										"s3:GetBucketLocation",
 				                        "s3:ListAllMyBuckets",
 							            "s3:ListBucket",
 				                        "s3:ListMultipartUploadParts",
