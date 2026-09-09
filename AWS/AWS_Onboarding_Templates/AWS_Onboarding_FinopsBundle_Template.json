@@ -240,7 +240,7 @@
 						"Sid": "Auth",
 						"Action": [
 							"access-analyzer:List*",
-                        				"acm:DescribeCertificate",
+                        	"acm:DescribeCertificate",
 				                        "acm:GetCertificate",
 				                        "acm:ListCertificates",
 				                        "acm:ListTagsForCertificate",
