@@ -32,6 +32,15 @@
 				"false"
 			]
 		},
+		"EnableS3CostSavingsRecommendation": {
+			"Description": "Flag to enable cost-saving policies that may incur additional AWS charges during S3 Cost Savings Recommendation generation.",
+			"Type": "String",
+			"Default": "false",
+			"AllowedValues": [
+				"true",
+				"false"
+			]
+		},
 		"CoreStackAccountId": {
 			"Type": "String",
 			"Description": "The AWS Account ID of Corestack.",
@@ -52,6 +61,14 @@
 					"Ref": "AWSCostAndUsageReportCURBucketName"
 				}, ""]
 			}]
+		},
+		"IncludeEnableCostSavings": {
+			"Fn::Equals": [
+				{
+					"Ref": "EnableS3CostSavingsRecommendation"
+				},
+				"true"
+			]
 		}
 	},
 	"Resources": {
@@ -240,7 +257,7 @@
 						"Sid": "Auth",
 						"Action": [
 							"access-analyzer:List*",
-                        	"acm:DescribeCertificate",
+                        				"acm:DescribeCertificate",
 				                        "acm:GetCertificate",
 				                        "acm:ListCertificates",
 				                        "acm:ListTagsForCertificate",
@@ -415,6 +432,32 @@
 				"Roles": [{
 					"Ref": "Role"
 				}]
+			}
+		},
+		"CostSavingsPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Condition": "IncludeEnableCostSavings",
+			"Properties": {
+				"PolicyName": "CoreStack_CostSavingsPolicy",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "Auth",
+							"Action": [
+								"s3:ListStorageLensConfigurations",
+								"s3:GetStorageLensConfiguration"
+							],
+							"Effect": "Allow",
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
 			}
 		}
 	},
