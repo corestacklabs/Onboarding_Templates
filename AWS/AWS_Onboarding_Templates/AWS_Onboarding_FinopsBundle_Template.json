@@ -33,7 +33,7 @@
 			]
 		},
 		"EnableS3CostSavingsRecommendation": {
-			"Description": "Flag to enable cost-saving policies that may incur additional AWS charges during S3 Cost Savings Recommendation generation.",
+			"Description": "Flag to enable cost-saving policies that may incur additional AWS charges during S3 Cost Savings Recommendation generation.     Note: Requires an S3 Storage Lens dashboard configured at the account level with the advanced metrics tier, including activity metrics and CloudWatch publishing.",
 			"Type": "String",
 			"Default": "false",
 			"AllowedValues": [
