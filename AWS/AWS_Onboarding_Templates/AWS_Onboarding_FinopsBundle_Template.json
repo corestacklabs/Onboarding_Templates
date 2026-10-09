@@ -33,7 +33,7 @@
 			]
 		},
 		"EnableS3CostSavingsRecommendation": {
-			"Description": "Flag to enable cost-saving policies that may incur additional AWS charges during S3 Cost Savings Recommendation generation.     Note: Requires an S3 Storage Lens dashboard configured at the account level with the advanced metrics tier, including activity metrics and CloudWatch publishing.",
+			"Description": "Required to retrieve the object count, object versions, and other relevant bucket-level details needed to identify and generate S3 cost-saving recommendations. Note: Requires an S3 Storage Lens dashboard configured at the account level with the advanced metrics tier, including activity metrics and CloudWatch publishing. Storage Lens advanced metrics incur a small recurring charge based on object count, not storage size (the Free tier has no additional cost) — e.g. a bucket with 1 TB stored and 200M objects would be charged approximately $40/month.",
 			"Type": "String",
 			"Default": "false",
 			"AllowedValues": [
@@ -45,6 +45,15 @@
 			"Type": "String",
 			"Description": "The AWS Account ID of Corestack.",
 			"Default": "028811834831"
+		},
+		"EnableBedrockFinOpsForAIPermissions": {
+			"Description": "Flag to enable IAM permissions required for CoreStack to discover Amazon Bedrock, Bedrock AgentCore and Bedrock Projects resources and read their tags, and for CoreStack FinOps for AI (Prompt Analytics, Bedrock Agents, and Gateway Integration).",
+			"Type": "String",
+			"Default": "false",
+			"AllowedValues": [
+				"true",
+				"false"
+			]
 		}
 	},
 	"Conditions": {
@@ -66,6 +75,14 @@
 			"Fn::Equals": [
 				{
 					"Ref": "EnableS3CostSavingsRecommendation"
+				},
+				"true"
+			]
+		},
+		"IncludeBedrockFinOpsForAI": {
+			"Fn::Equals": [
+				{
+					"Ref": "EnableBedrockFinOpsForAIPermissions"
 				},
 				"true"
 			]
@@ -187,7 +204,7 @@
 				"PolicyName": "CoreStack_AWSCURAccessPolicy",
 				"PolicyDocument": {
 					"Statement": [{
-						"Sid": "Auth",
+						"Sid": "GetCURObject",
 						"Action": [
 							"s3:GetObject"
 						],
@@ -201,6 +218,24 @@
 										"Ref": "AWSCostAndUsageReportCURBucketName"
 									},
 									"/*"
+								]
+							]
+						}
+					},
+					{
+						"Sid": "ListCURBucket",
+						"Action": [
+							"s3:ListBucket"
+						],
+						"Effect": "Allow",
+						"Resource": {
+							"Fn::Join": [
+								"",
+								[
+									"arn:aws:s3:::",
+									{
+										"Ref": "AWSCostAndUsageReportCURBucketName"
+									}
 								]
 							]
 						}
@@ -233,11 +268,11 @@
 							"compute-optimizer:GetRecommendationSummaries",
 							"ce:GetSavingsPlansPurchaseRecommendation",
 							"ce:GetSavingsPlansUtilization",
-                            "savingsplans:DescribeSavingsPlans",
-                            "cloudwatch:GetMetricData",
-                            "cloudwatch:GetMetricStatistics",
-                            "cloudwatch:ListDashboards",
-                            "cloudwatch:ListMetrics"
+							"savingsplans:DescribeSavingsPlans",
+							"cloudwatch:GetMetricData",
+							"cloudwatch:GetMetricStatistics",
+							"cloudwatch:ListDashboards",
+							"cloudwatch:ListMetrics"
 						],
 						"Effect": "Allow",
 						"Resource": "*"
@@ -256,7 +291,7 @@
 					"Statement": [{
 						"Sid": "Auth",
 						"Action": [
-							"access-analyzer:List*",
+										"access-analyzer:List*",
                         				"acm:DescribeCertificate",
 				                        "acm:GetCertificate",
 				                        "acm:ListCertificates",
@@ -269,13 +304,9 @@
 				                        "appsync:ListGraphqlApis",
 				                        "athena:List*",
 				                        "autoscaling:Describe*",
-				                        "backup:GetBackupPlan",
 				                        "backup:ListBackupJobs",
 				                        "backup:ListBackupVaults",
 				                        "batch:Describe*",
-				                        "clouddirectory:DescribeDirectories",
-				                        "clouddirectory:GetDirectory",
-				                        "clouddirectory:ListDirectories",
 				                        "cloudformation:DescribeStacks",
 				                        "cloudformation:GetStackPolicy",
 				                        "cloudformation:GetTemplate",
@@ -283,19 +314,15 @@
 				                        "cloudformation:ListStacks",
 				                        "cloudfront:Get*",
 				                        "cloudfront:List*",
-				                        "cloudhsm:Describe*",
-				                        "cloudhsm:List*",
 				                        "cloudsearch:DescribeDomains",
 				                        "codeartifact:DescribeDomain",
 				                        "codeartifact:ListDomains",
 				                        "codebuild:ListProjects",
-				                        "codepipeline:List",
+				                        "codepipeline:ListWebhooks",
 				                        "cognito-identity:Describe*",
 				                        "cognito-identity:Get*",
 				                        "cognito-identity:ListIdentityPools",
 				                        "cognito-idp:ListUserPools",
-				                        "cognito-user:Describe*",
-				                        "cognito-user:List*",
 				                        "datapipeline:DescribePipelines",
 				                        "datapipeline:GetPipelineDefinition",
 				                        "datapipeline:ListPipelines",
@@ -336,21 +363,30 @@
 				                        "glue:Get*",
 				                        "glue:List*",
 				                        "iam:SimulatePrincipalPolicy",
-				                        "iot:DescribeThing",
-				                        "iot:ListThings",
 				                        "kafka:Describe*",
 				                        "kafka:List*",
 				                        "kinesis:DescribeStream",
 				                        "kinesis:GetShardIterator",
 				                        "kinesis:ListStreams",
 				                        "kinesis:ListTagsForStream",
-				                        "lambda:Get*",
-				                        "lambda:List*",
+				                        "lambda:GetAccountSettings",
+				                        "lambda:GetEventSourceMapping",
+				                        "lambda:GetFunction",
+				                        "lambda:GetFunctionCodeSigningConfig",
+				                        "lambda:GetFunctionConcurrency",
+				                        "lambda:GetFunctionConfiguration",
+				                        "lambda:GetFunctionUrlConfig",
+				                        "lambda:GetPolicy",
+				                        "lambda:GetProvisionedConcurrencyConfig",
+				                        "lambda:ListAliases",
+				                        "lambda:ListEventSourceMappings",
+				                        "lambda:ListFunctions",
+				                        "lambda:ListProvisionedConcurrencyConfigs",
+				                        "lambda:ListTags",
 				                        "lex:GetBots",
 				                        "lightsail:Get*",
 				                        "logs:DescribeLogGroups",
 				                        "logs:DescribeLogStreams",
-				                        "logs:GetLogEvents",
 				                        "logs:ListTagsForResource",
 				                        "mgh:DescribeApplicationState",
 				                        "mgh:ListApplicationStates",
@@ -378,15 +414,11 @@
 				                        "s3:GetAccountPublicAccessBlock",
 				                        "s3:GetEncryptionConfiguration",
 				                        "s3:GetLifecycleConfiguration",
-				                        "s3:GetNotificationConfiguration",
+				                        "s3:GetBucketNotification",
 										"s3:GetBucketLocation",
 				                        "s3:ListAllMyBuckets",
-							            "s3:ListBucket",
 				                        "s3:ListMultipartUploadParts",
-										"s3:HeadBucket",
 				                        "sagemaker:List*",
-				                        "sdb:DomainMetadata",
-				                        "sdb:ListDomains",
 				                        "secretsmanager:Describe*",
 				                        "secretsmanager:List*",
 				                        "securityhub:DescribeStandards",
@@ -395,26 +427,21 @@
 				                        "servicecatalog:Describe*",
 				                        "servicecatalog:List*",
 				                        "ses:ListConfigurationSets",
-				                        "sheild:DescribeProtection",
-				                        "sheild:ListProtections",
+				                        "shield:DescribeSubscription",
+				                        "shield:DescribeDRTAccess",
 				                        "sns:Get*",
 				                        "sns:List*",
 				                        "sqs:Get*",
 				                        "sqs:List*",
-				                        "sqs:ReceiveMessage",
 				                        "ssm:Describe*",
-				                        "ssm:Get*",
 				                        "ssm:List*",
 				                        "states:ListActivities",
 				                        "states:ListStateMachines",
 				                        "states:ListTagsForResource",
 				                        "storagegateway:Describe*",
 				                        "storagegateway:List*",
-				                        "swf:List*",
 				                        "synthetics:DescribeCanaries",
 				                        "transfer:ListServers",
-				                        "waf-regional:Get*",
-				                        "waf-regional:List*",
 				                        "waf:Get*",
 				                        "waf:List*",
 				                        "wafv2:Get*",
@@ -427,6 +454,33 @@
 						],
 						"Effect": "Allow",
 						"Resource": "*"
+					}, {
+						"Sid": "DenySensitiveActions",
+						"Effect": "Deny",
+						"Action": [
+							"cognito-identity:GetId",
+							"cognito-identity:GetCredentialsForIdentity",
+							"cognito-identity:GetOpenIdToken",
+							"cognito-identity:GetOpenIdTokenForDeveloperIdentity",
+							"lightsail:GetInstanceAccessDetails",
+							"lightsail:GetRelationalDatabaseMasterUserPassword",
+							"wafv2:GetDecryptedAPIKey",
+							"ec2:DescribeInstanceAttribute",
+							"quicksight:DescribeAssetBundleExportJob",
+							"quicksight:DescribeDashboardSnapshotJobResult",
+							"sns:ListPhoneNumbersOptedOut",
+							"lightsail:GetContainerLog",
+							"lightsail:GetRelationalDatabaseLogEvents",
+							"glue:GetConnection",
+							"glue:GetConnections",
+							"glue:GetStatement",
+							"glue:GetEntityRecords",
+							"glue:GetDataPreviewStatement",
+							"glue:GetRecipeAction",
+							"glue:GetDashboardUrl",
+							"storagegateway:DescribeChapCredentials"
+						],
+						"Resource": "*"
 					}]
 				},
 				"Roles": [{
@@ -434,11 +488,11 @@
 				}]
 			}
 		},
-		"CostSavingsPolicy": {
+		"S3CostOptimizationPolicy": {
 			"Type": "AWS::IAM::Policy",
 			"Condition": "IncludeEnableCostSavings",
 			"Properties": {
-				"PolicyName": "CoreStack_CostSavingsPolicy",
+				"PolicyName": "CoreStack_S3CostOptimizationPolicy",
 				"PolicyDocument": {
 					"Version": "2012-10-17",
 					"Statement": [
@@ -449,6 +503,93 @@
 								"s3:GetStorageLensConfiguration"
 							],
 							"Effect": "Allow",
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"BedrockFinOpsForAIPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Condition": "IncludeBedrockFinOpsForAI",
+			"Properties": {
+				"PolicyName": "CoreStack_BedrockFinOpsForAIPolicy",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "CoreStackBedrockFinOpsForAIReadOnly",
+							"Effect": "Allow",
+							"Action": [
+								"bedrock-agentcore:ListAgentRuntimes",
+								"bedrock-agentcore:ListBrowsers",
+								"bedrock-agentcore:ListCodeInterpreters",
+								"bedrock-agentcore:ListGatewayTargets",
+								"bedrock-agentcore:ListGateways",
+								"bedrock-agentcore:ListHarnesses",
+								"bedrock-agentcore:ListMemories",
+								"bedrock-agentcore:ListPolicyEngines",
+								"bedrock-agentcore:ListRegistries",
+								"bedrock-agentcore:ListRegistryRecords",
+								"bedrock-agentcore:ListWorkloadIdentities",
+								"bedrock-mantle:ListProjects",
+								"bedrock:GetModelInvocationLoggingConfiguration",
+								"bedrock:ListAgentActionGroups",
+								"bedrock:ListAgentAliases",
+								"bedrock:ListAgentCollaborators",
+								"bedrock:ListAgentVersions",
+								"bedrock:ListAgents",
+								"bedrock:ListCustomModelDeployments",
+								"bedrock:ListCustomModels",
+								"bedrock:ListDataSources",
+								"bedrock:ListFlowAliases",
+								"bedrock:ListFlows",
+								"bedrock:ListFoundationModels",
+								"bedrock:ListGuardrails",
+								"bedrock:ListImportedModels",
+								"bedrock:ListInferenceProfiles",
+								"bedrock:ListIngestionJobs",
+								"bedrock:ListKnowledgeBases",
+								"bedrock:ListModelCustomizationJobs",
+								"bedrock:ListPromptRouters",
+								"bedrock:ListProvisionedModelThroughputs",
+								"bedrock-agentcore:GetAgentRuntime",
+								"bedrock-agentcore:GetGateway",
+								"bedrock-agentcore:GetGatewayTarget",
+								"bedrock-agentcore:GetHarness",
+								"bedrock-agentcore:GetMemory",
+								"bedrock-agentcore:GetRegistryRecord",
+								"bedrock-agentcore:ListPolicySummaries",
+								"bedrock-mantle:GetProject",
+								"bedrock:GetAgent",
+								"bedrock:GetAgentActionGroup",
+								"bedrock:GetCustomModelDeployment",
+								"bedrock:GetDataSource",
+								"bedrock:GetFlow",
+								"bedrock:GetFoundationModelAvailability",
+								"bedrock:GetGuardrail",
+								"bedrock:GetInferenceProfile",
+								"bedrock:GetIngestionJob",
+								"bedrock:GetKnowledgeBase",
+								"bedrock:GetProvisionedModelThroughput",
+								"bedrock:ListAgentKnowledgeBases",
+								"bedrock:ListFlowExecutions",
+								"bedrock:ListFlowVersions",
+								"bedrock-agentcore:ListTagsForResource",
+								"bedrock:ListTagsForResource",
+								"bedrock:GetAgentVersion",
+								"bedrock:GetAgentAlias",
+								"logs:FilterLogEvents",
+								"logs:StartQuery",
+								"logs:GetQueryResults",
+								"logs:StopQuery",
+								"iam:ListRoles"
+							],
 							"Resource": "*"
 						}
 					]
@@ -482,8 +623,12 @@
 			"Value": {
 				"Ref": "EnforceMFA"
 			}
+		},
+		"BedrockFinOpsForAIPermissionsEnabled": {
+			"Description": "Flag to identify whether the Bedrock and FinOps for AI policy was attached to the role.",
+			"Value": {
+				"Ref": "EnableBedrockFinOpsForAIPermissions"
+			}
 		}
 	}
 }
-
-
