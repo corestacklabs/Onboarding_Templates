@@ -1,0 +1,752 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Creates a new IAM role for your AWS Master account with ReadOnlyAccess permissions needed for Finops Bundle",
+	"Parameters": {
+		"RoleName": {
+			"Type": "String",
+			"Description": "The name of the IAM role to create. Use alphanumeric and '+=,.@-_' characters.",
+			"AllowedPattern": "[\\w+=,.@-]{1,64}",
+			"MinLength": "1",
+			"MaxLength": "64"
+		},
+		"ExternalId": {
+			"Type": "String",
+			"Description": "The external ID can be any word or number that is agreed upon between you and the third-party (Corestack - 028811834831) account. Use alphanumeric and '=,.@:/-' characters.",
+			"AllowedPattern": "[a-zA-Z0-9=,.@:/-]*",
+			"MinLength": "1",
+			"MaxLength": "64"
+		},
+		"AWSCostAndUsageReportCURBucketName": {
+			"Type": "String",
+			"Description": "The name of the Cost and Usage Report (CUR) S3 bucket name to get Cost details.     NOTE: THIS IS AN OPTIONAL PARAMETER, SHOULD BE INCLUDED FOR AWS MANAGEMENT/LINKED/STANDARD ACCOUNTS FOR WHICH CUR IS ENABLED!!!!Use lowercase letters, numbers, periods (.), hyphens (-), and underscores (_)",
+			"AllowedPattern": "^[a-z0-9\\.\\-\\_]*$",
+			"MinLength": "0",
+			"MaxLength": "64"
+		},
+		"EnforceMFA": {
+			"Description": "Flag to enforce MFA (Multi-Factor Authentication) when Assuming the role.",
+			"Type": "String",
+			"Default": "false",
+			"AllowedValues": [
+				"true",
+				"false"
+			]
+		},
+		"EnableS3CostSavingsRecommendation": {
+			"Description": "Required to retrieve the object count, object versions, and other relevant bucket-level details needed to identify and generate S3 cost-saving recommendations. Note: Requires an S3 Storage Lens dashboard configured at the account level with the advanced metrics tier, including activity metrics and CloudWatch publishing. Storage Lens advanced metrics incur a small recurring charge based on object count, not storage size (the Free tier has no additional cost) — e.g. a bucket with 1 TB stored and 200M objects would be charged approximately $40/month.",
+			"Type": "String",
+			"Default": "false",
+			"AllowedValues": [
+				"true",
+				"false"
+			]
+		},
+		"CoreStackAccountId": {
+			"Type": "String",
+			"Description": "The AWS Account ID of Corestack.",
+			"Default": "028811834831"
+		},
+		"EnableBedrockFinOpsForAIPermissions": {
+			"Description": "Flag to enable IAM permissions required for CoreStack to discover Amazon Bedrock, Bedrock AgentCore and Bedrock Projects resources and read their tags, and for CoreStack FinOps for AI (Prompt Analytics, Bedrock Agents, and Gateway Integration).",
+			"Type": "String",
+			"Default": "false",
+			"AllowedValues": [
+				"true",
+				"false"
+			]
+		}
+	},
+	"Conditions": {
+		"IncludeMFACondition": {
+			"Fn::Equals": [
+				{
+					"Ref": "EnforceMFA"
+				},
+				"true"
+			]
+		},
+		"BucketNotEmpty": {
+			"Fn::Not": [
+				{
+					"Fn::Equals": [
+						{
+							"Ref": "AWSCostAndUsageReportCURBucketName"
+						},
+						""
+					]
+				}
+			]
+		},
+		"IncludeEnableCostSavings": {
+			"Fn::Equals": [
+				{
+					"Ref": "EnableS3CostSavingsRecommendation"
+				},
+				"true"
+			]
+		},
+		"IncludeBedrockFinOpsForAI": {
+			"Fn::Equals": [
+				{
+					"Ref": "EnableBedrockFinOpsForAIPermissions"
+				},
+				"true"
+			]
+		}
+	},
+	"Resources": {
+		"Role": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "RoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"AWS": {
+									"Fn::Join": [
+										"",
+										[
+											"arn:aws:iam::",
+											{
+												"Ref": "CoreStackAccountId"
+											},
+											":root"
+										]
+									]
+								}
+							},
+							"Condition": {
+								"Fn::If": [
+									"IncludeMFACondition",
+									{
+										"StringEquals": {
+											"sts:ExternalId": {
+												"Ref": "ExternalId"
+											}
+										},
+										"Bool": {
+											"aws:MultiFactorAuthPresent": "true"
+										}
+									},
+									{
+										"StringEquals": {
+											"sts:ExternalId": {
+												"Ref": "ExternalId"
+											}
+										}
+									}
+								]
+							},
+							"Action": [
+								"sts:AssumeRole"
+							]
+						}
+					]
+				},
+				"Tags": [
+					{
+						"Key": "Purpose",
+						"Value": "CoreStack"
+					}
+				]
+			}
+		},
+		"BudgetAndBillingPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "CoreStack_BudgetAndBillingPolicy",
+				"PolicyDocument": {
+					"Statement": [
+						{
+							"Sid": "Auth",
+							"Action": [
+								"budgets:ViewBudget",
+								"budgets:DescribeBudgetActionHistories",
+								"budgets:DescribeBudgetActionsForAccount"
+							],
+							"Effect": "Allow",
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"SupportAndRIPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "CoreStack_SupportAndRIPolicy",
+				"PolicyDocument": {
+					"Statement": [
+						{
+							"Sid": "Auth",
+							"Action": [
+								"ce:GetReservationPurchaseRecommendation",
+								"ce:GetReservationUtilization",
+								"ce:DescribeNotificationSubscription",
+								"ce:GetReservationCoverage",
+								"support:DescribeServices",
+								"support:DescribeSupportLevel",
+								"support:DescribeTrustedAdvisorCheckResult",
+								"support:DescribeTrustedAdvisorChecks"
+							],
+							"Effect": "Allow",
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"AWSCURAccessPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Condition": "BucketNotEmpty",
+			"Properties": {
+				"PolicyName": "CoreStack_AWSCURAccessPolicy",
+				"PolicyDocument": {
+					"Statement": [
+						{
+							"Sid": "GetCURObject",
+							"Action": [
+								"s3:GetObject"
+							],
+							"Effect": "Allow",
+							"Resource": {
+								"Fn::Join": [
+									"",
+									[
+										"arn:aws:s3:::",
+										{
+											"Ref": "AWSCostAndUsageReportCURBucketName"
+										},
+										"/*"
+									]
+								]
+							}
+						},
+						{
+							"Sid": "ListCURBucket",
+							"Action": [
+								"s3:ListBucket"
+							],
+							"Effect": "Allow",
+							"Resource": {
+								"Fn::Join": [
+									"",
+									[
+										"arn:aws:s3:::",
+										{
+											"Ref": "AWSCostAndUsageReportCURBucketName"
+										}
+									]
+								]
+							}
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"ComputeOptimizerPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": "CoreStack_ComputeOptimizerPolicy",
+				"PolicyDocument": {
+					"Statement": [
+						{
+							"Sid": "Auth",
+							"Action": [
+								"compute-optimizer:DescribeRecommendationExportJobs",
+								"compute-optimizer:GetAutoScalingGroupRecommendations",
+								"compute-optimizer:GetEBSVolumeRecommendations",
+								"compute-optimizer:GetEC2InstanceRecommendations",
+								"compute-optimizer:GetEC2RecommendationProjectedMetrics",
+								"compute-optimizer:GetECSServiceRecommendationProjectedMetrics",
+								"compute-optimizer:GetECSServiceRecommendations",
+								"compute-optimizer:GetEffectiveRecommendationPreferences",
+								"compute-optimizer:GetEnrollmentStatus",
+								"compute-optimizer:GetLambdaFunctionRecommendations",
+								"compute-optimizer:GetRecommendationPreferences",
+								"compute-optimizer:GetRecommendationSummaries",
+								"ce:GetSavingsPlansPurchaseRecommendation",
+								"ce:GetSavingsPlansUtilization",
+								"savingsplans:DescribeSavingsPlans",
+								"cloudwatch:GetMetricData",
+								"cloudwatch:GetMetricStatistics",
+								"cloudwatch:ListDashboards",
+								"cloudwatch:ListMetrics",
+								"pi:GetResourceMetrics"
+							],
+							"Effect": "Allow",
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"InventoryFinopsReadPolicy1": {
+			"Type": "AWS::IAM::ManagedPolicy",
+			"Properties": {
+				"ManagedPolicyName": {
+					"Fn::Sub": "CoreStack_InventoryFinopsReadPolicy1-${RoleName}"
+				},
+				"Description": "CoreStack FinOps resource inventory and policy engine read access (apigateway to ecs), part 1 of 3",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "Auth",
+							"Effect": "Allow",
+							"Action": [
+								"apigateway:GET",
+								"application-autoscaling:DescribeScheduledActions",
+								"appsync:ListGraphqlApis",
+								"athena:ListNamedQueries",
+								"athena:ListWorkGroups",
+								"autoscaling:DescribeAutoScalingGroups",
+								"autoscaling:DescribeAutoScalingInstances",
+								"autoscaling:DescribePolicies",
+								"batch:DescribeComputeEnvironments",
+								"batch:DescribeJobQueues",
+								"cloudformation:DescribeStacks",
+								"cloudformation:GetStackPolicy",
+								"cloudformation:ListStackResources",
+								"cloudformation:ListStacks",
+								"cloudfront:GetDistribution",
+								"cloudfront:ListDistributions",
+								"cloudsearch:DescribeDomains",
+								"codeartifact:DescribeDomain",
+								"codeartifact:ListDomains",
+								"codebuild:ListProjects",
+								"codepipeline:ListWebhooks",
+								"cognito-identity:ListIdentityPools",
+								"cognito-idp:ListUserPools",
+								"datapipeline:DescribePipelines",
+								"datapipeline:ListPipelines",
+								"directconnect:DescribeConnections",
+								"directconnect:DescribeVirtualGateways",
+								"directconnect:DescribeVirtualInterfaces",
+								"ds:DescribeDirectories",
+								"dynamodb:DescribeContinuousBackups",
+								"dynamodb:DescribeTable",
+								"dynamodb:ListBackups",
+								"dynamodb:ListGlobalTables",
+								"dynamodb:ListTables",
+								"dynamodb:ListTagsOfResource",
+								"ec2:DescribeAddresses",
+								"ec2:DescribeDhcpOptions",
+								"ec2:DescribeEgressOnlyInternetGateways",
+								"ec2:DescribeHosts",
+								"ec2:DescribeImages",
+								"ec2:DescribeInstanceStatus",
+								"ec2:DescribeInstanceTypes",
+								"ec2:DescribeInstances",
+								"ec2:DescribeInternetGateways",
+								"ec2:DescribeNatGateways",
+								"ec2:DescribeNetworkInterfaces",
+								"ec2:DescribeRegions",
+								"ec2:DescribeReservedInstances",
+								"ec2:DescribeSecurityGroups",
+								"ec2:DescribeSnapshotAttribute",
+								"ec2:DescribeSnapshots",
+								"ec2:DescribeSubnets",
+								"ec2:DescribeTags",
+								"ec2:DescribeTrafficMirrorSessions",
+								"ec2:DescribeTrafficMirrorTargets",
+								"ec2:DescribeTransitGatewayAttachments",
+								"ec2:DescribeTransitGateways",
+								"ec2:DescribeVolumes",
+								"ec2:DescribeVpcEndpointServices",
+								"ec2:DescribeVpcEndpoints",
+								"ec2:DescribeVpcs",
+								"ec2:DescribeVpnGateways",
+								"ecr-public:DescribeRepositories",
+								"ecr-public:GetRepositoryCatalogData",
+								"ecr:BatchGetImage",
+								"ecr:DescribeImages",
+								"ecr:DescribeRepositories",
+								"ecr:GetLifecyclePolicy",
+								"ecr:GetLifecyclePolicyPreview",
+								"ecs:DescribeClusters",
+								"ecs:DescribeContainerInstances",
+								"ecs:DescribeServices",
+								"ecs:DescribeTasks",
+								"ecs:ListAccountSettings",
+								"ecs:ListClusters",
+								"ecs:ListContainerInstances",
+								"ecs:ListServices",
+								"ecs:ListTaskDefinitions",
+								"ecs:ListTasks"
+							],
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"InventoryFinopsReadPolicy2": {
+			"Type": "AWS::IAM::ManagedPolicy",
+			"Properties": {
+				"ManagedPolicyName": {
+					"Fn::Sub": "CoreStack_InventoryFinopsReadPolicy2-${RoleName}"
+				},
+				"Description": "CoreStack FinOps resource inventory and policy engine read access (eks to organizations), part 2 of 3",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "Auth",
+							"Effect": "Allow",
+							"Action": [
+								"eks:DescribeCluster",
+								"eks:DescribeNodegroup",
+								"eks:ListClusters",
+								"eks:ListNodegroups",
+								"elasticache:DescribeCacheClusters",
+								"elasticache:DescribeCacheParameterGroups",
+								"elasticache:DescribeCacheSecurityGroups",
+								"elasticache:DescribeCacheSubnetGroups",
+								"elasticache:DescribeReplicationGroups",
+								"elasticache:DescribeReservedCacheNodes",
+								"elasticache:DescribeServiceUpdates",
+								"elasticache:DescribeSnapshots",
+								"elasticache:ListAllowedNodeTypeModifications",
+								"elasticache:ListTagsForResource",
+								"elasticbeanstalk:DescribeApplications",
+								"elasticbeanstalk:DescribeEnvironments",
+								"elasticfilesystem:DescribeFileSystems",
+								"elasticfilesystem:ListTagsForResource",
+								"elasticloadbalancing:DescribeListeners",
+								"elasticloadbalancing:DescribeLoadBalancerAttributes",
+								"elasticloadbalancing:DescribeLoadBalancerPolicies",
+								"elasticloadbalancing:DescribeLoadBalancers",
+								"elasticloadbalancing:DescribeTags",
+								"elasticloadbalancing:DescribeTargetGroups",
+								"elasticloadbalancing:DescribeTargetHealth",
+								"elasticmapreduce:DescribeSecurityConfiguration",
+								"elasticmapreduce:ListClusters",
+								"elasticmapreduce:ListInstanceFleets",
+								"elasticmapreduce:ListInstanceGroups",
+								"elasticmapreduce:ListInstances",
+								"elasticmapreduce:ListSecurityConfigurations",
+								"fsx:DescribeBackups",
+								"fsx:DescribeFileSystems",
+								"glacier:ListTagsForVault",
+								"glacier:ListVaults",
+								"glue:ListCrawlers",
+								"glue:ListJobs",
+								"iam:SimulatePrincipalPolicy",
+								"kafka:ListClustersV2",
+								"kinesis:DescribeStream",
+								"kinesis:GetShardIterator",
+								"kinesis:ListStreams",
+								"kinesis:ListTagsForStream",
+								"lambda:GetAccountSettings",
+								"lambda:GetEventSourceMapping",
+								"lambda:GetFunctionConcurrency",
+								"lambda:GetFunctionUrlConfig",
+								"lambda:GetPolicy",
+								"lambda:GetProvisionedConcurrencyConfig",
+								"lambda:ListAliases",
+								"lambda:ListEventSourceMappings",
+								"lambda:ListFunctions",
+								"lambda:ListProvisionedConcurrencyConfigs",
+								"lambda:ListTags",
+								"lightsail:GetBlueprints",
+								"lightsail:GetBuckets",
+								"lightsail:GetBundles",
+								"lightsail:GetDiskSnapshots",
+								"lightsail:GetDisks",
+								"lightsail:GetDomains",
+								"lightsail:GetInstanceMetricData",
+								"lightsail:GetInstanceSnapshots",
+								"lightsail:GetInstances",
+								"lightsail:GetLoadBalancers",
+								"lightsail:GetRegions",
+								"lightsail:GetRelationalDatabaseMetricData",
+								"lightsail:GetRelationalDatabaseSnapshots",
+								"lightsail:GetRelationalDatabases",
+								"lightsail:GetStaticIps",
+								"logs:DescribeLogGroups",
+								"logs:DescribeLogStreams",
+								"logs:ListTagsForResource",
+								"organizations:DescribeAccount",
+								"organizations:DescribeCreateAccountStatus",
+								"organizations:DescribeOrganization",
+								"organizations:ListAccounts",
+								"organizations:ListAccountsForParent",
+								"organizations:ListOrganizationalUnitsForParent",
+								"organizations:ListPoliciesForTarget",
+								"organizations:ListRoots",
+								"organizations:ListTagsForResource"
+							],
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"InventoryFinopsReadPolicy3": {
+			"Type": "AWS::IAM::ManagedPolicy",
+			"Properties": {
+				"ManagedPolicyName": {
+					"Fn::Sub": "CoreStack_InventoryFinopsReadPolicy3-${RoleName}"
+				},
+				"Description": "CoreStack FinOps resource inventory and policy engine read access (quicksight to transfer), part 3 of 3",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "Auth",
+							"Effect": "Allow",
+							"Action": [
+								"quicksight:ListDashboards",
+								"quicksight:ListDataSets",
+								"quicksight:ListDataSources",
+								"rds:DescribeDBClusterParameterGroups",
+								"rds:DescribeDBClusterSnapshotAttributes",
+								"rds:DescribeDBClusterSnapshots",
+								"rds:DescribeDBClusters",
+								"rds:DescribeDBEngineVersions",
+								"rds:DescribeDBInstances",
+								"rds:DescribeDBParameterGroups",
+								"rds:DescribeDBParameters",
+								"rds:DescribeDBSecurityGroups",
+								"rds:DescribeDBSnapshotAttributes",
+								"rds:DescribeDBSnapshots",
+								"rds:DescribeDBSubnetGroups",
+								"rds:DescribeEventSubscriptions",
+								"rds:DescribeOptionGroups",
+								"rds:DescribeOrderableDBInstanceOptions",
+								"rds:DescribeReservedDBInstances",
+								"rds:ListTagsForResource",
+								"redshift:DescribeClusterParameters",
+								"redshift:DescribeClusterSecurityGroups",
+								"redshift:DescribeClusterSnapshots",
+								"redshift:DescribeClusterSubnetGroups",
+								"redshift:DescribeClusters",
+								"redshift:DescribeLoggingStatus",
+								"redshift:DescribeUsageLimits",
+								"rekognition:DescribeProjects",
+								"resource-groups:ListGroups",
+								"route53:GetTrafficPolicy",
+								"route53:GetTrafficPolicyInstance",
+								"route53:ListHostedZones",
+								"route53:ListTagsForResource",
+								"route53resolver:ListResolverEndpoints",
+								"route53resolver:ListResolverRules",
+								"s3:GetAccountPublicAccessBlock",
+								"s3:GetEncryptionConfiguration",
+								"s3:GetLifecycleConfiguration",
+								"s3:GetBucketNotification",
+								"s3:GetBucketLocation",
+								"s3:ListAllMyBuckets",
+								"s3:ListMultipartUploadParts",
+								"secretsmanager:ListSecrets",
+								"ses:ListConfigurationSets",
+								"shield:DescribeSubscription",
+								"sns:ListSubscriptions",
+								"sns:ListTagsForResource",
+								"sns:ListTopics",
+								"sqs:GetQueueAttributes",
+								"sqs:ListQueueTags",
+								"sqs:ListQueues",
+								"ssm:DescribeInstanceAssociationsStatus",
+								"ssm:DescribeInstanceInformation",
+								"ssm:DescribeParameters",
+								"ssm:ListDocuments",
+								"states:ListActivities",
+								"states:ListStateMachines",
+								"states:ListTagsForResource",
+								"tag:GetResources",
+								"tag:GetTagKeys",
+								"tag:GetTagValues",
+								"transfer:ListServers"
+							],
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"S3CostOptimizationPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Condition": "IncludeEnableCostSavings",
+			"Properties": {
+				"PolicyName": "CoreStack_S3CostOptimizationPolicy",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "Auth",
+							"Action": [
+								"s3:ListStorageLensConfigurations",
+								"s3:GetStorageLensConfiguration"
+							],
+							"Effect": "Allow",
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		},
+		"BedrockFinOpsForAIPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Condition": "IncludeBedrockFinOpsForAI",
+			"Properties": {
+				"PolicyName": "CoreStack_BedrockFinOpsForAIPolicy",
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "CoreStackBedrockFinOpsForAIReadOnly",
+							"Effect": "Allow",
+							"Action": [
+								"bedrock-agentcore:ListAgentRuntimes",
+								"bedrock-agentcore:ListBrowsers",
+								"bedrock-agentcore:ListCodeInterpreters",
+								"bedrock-agentcore:ListGatewayTargets",
+								"bedrock-agentcore:ListGateways",
+								"bedrock-agentcore:ListHarnesses",
+								"bedrock-agentcore:ListMemories",
+								"bedrock-agentcore:ListPolicyEngines",
+								"bedrock-agentcore:ListRegistries",
+								"bedrock-agentcore:ListRegistryRecords",
+								"bedrock-agentcore:ListWorkloadIdentities",
+								"bedrock-mantle:ListProjects",
+								"bedrock:GetModelInvocationLoggingConfiguration",
+								"bedrock:ListAgentActionGroups",
+								"bedrock:ListAgentAliases",
+								"bedrock:ListAgentCollaborators",
+								"bedrock:ListAgentVersions",
+								"bedrock:ListAgents",
+								"bedrock:ListCustomModelDeployments",
+								"bedrock:ListCustomModels",
+								"bedrock:ListDataSources",
+								"bedrock:ListFlowAliases",
+								"bedrock:ListFlows",
+								"bedrock:ListFoundationModels",
+								"bedrock:ListGuardrails",
+								"bedrock:ListImportedModels",
+								"bedrock:ListInferenceProfiles",
+								"bedrock:ListIngestionJobs",
+								"bedrock:ListKnowledgeBases",
+								"bedrock:ListModelCustomizationJobs",
+								"bedrock:ListPromptRouters",
+								"bedrock:ListProvisionedModelThroughputs",
+								"bedrock-agentcore:GetAgentRuntime",
+								"bedrock-agentcore:GetGateway",
+								"bedrock-agentcore:GetGatewayTarget",
+								"bedrock-agentcore:GetHarness",
+								"bedrock-agentcore:GetMemory",
+								"bedrock-agentcore:GetRegistryRecord",
+								"bedrock-agentcore:ListPolicySummaries",
+								"bedrock-mantle:GetProject",
+								"bedrock:GetAgent",
+								"bedrock:GetAgentActionGroup",
+								"bedrock:GetCustomModelDeployment",
+								"bedrock:GetDataSource",
+								"bedrock:GetFlow",
+								"bedrock:GetFoundationModelAvailability",
+								"bedrock:GetGuardrail",
+								"bedrock:GetInferenceProfile",
+								"bedrock:GetIngestionJob",
+								"bedrock:GetKnowledgeBase",
+								"bedrock:GetProvisionedModelThroughput",
+								"bedrock:ListAgentKnowledgeBases",
+								"bedrock:ListFlowExecutions",
+								"bedrock:ListFlowVersions",
+								"bedrock-agentcore:ListTagsForResource",
+								"bedrock:ListTagsForResource",
+								"bedrock:GetAgentVersion",
+								"bedrock:GetAgentAlias",
+								"logs:FilterLogEvents",
+								"logs:StartQuery",
+								"logs:GetQueryResults",
+								"logs:StopQuery",
+								"iam:ListRoles"
+							],
+							"Resource": "*"
+						}
+					]
+				},
+				"Roles": [
+					{
+						"Ref": "Role"
+					}
+				]
+			}
+		}
+	},
+	"Outputs": {
+		"RoleARN": {
+			"Description": "ARN of the IAM Role.",
+			"Value": {
+				"Fn::GetAtt": [
+					"Role",
+					"Arn"
+				]
+			}
+		},
+		"ExternalId": {
+			"Description": "ExternalId used in Role trusted policy.",
+			"Value": {
+				"Ref": "ExternalId"
+			}
+		},
+		"MFAEnabled": {
+			"Description": "Flag to identify MFA enforced for the role or not.",
+			"Value": {
+				"Ref": "EnforceMFA"
+			}
+		},
+		"BedrockFinOpsForAIPermissionsEnabled": {
+			"Description": "Flag to identify whether the Bedrock and FinOps for AI policy was attached to the role.",
+			"Value": {
+				"Ref": "EnableBedrockFinOpsForAIPermissions"
+			}
+		}
+	}
+}
