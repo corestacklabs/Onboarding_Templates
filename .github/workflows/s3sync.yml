@@ -18,7 +18,9 @@ jobs:
         sudo apt-get update && sudo apt-get -y install awscli
         aws configure set aws_access_key_id $aws_key_id
         aws configure set aws_secret_access_key $aws_secret_access_key 
-        aws configure set default.region us-east-1       
+        aws configure set default.region us-east-1
+        aws s3 cp AWS/AWS_Onboarding_Templates/AWS_LeastFinopsBundle_Onboarding_Template.json s3://$aws_s3_bucket/
+        aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_LeastFinopsBundle_Onboarding_Template.json  --acl public-read
         aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_AllModule_AGTemplate.json s3://$aws_s3_bucket/
         aws s3api put-object-acl --bucket $aws_s3_bucket --key AWS_Onboarding_AllModule_AGTemplate.json  --acl public-read
         aws s3 cp AWS/AWS_Onboarding_Templates/AWS_Onboarding_AllModule_Template.json s3://$aws_s3_bucket/
@@ -101,4 +103,3 @@ jobs:
         aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_finops_readonly_681410986374.json --acl public-read
         aws s3 cp AWS/AWS_Onboarding_Templates/corestack_finops_readonly_028811834831.json s3://$aws_s3_bucket/
         aws s3api put-object-acl --bucket $aws_s3_bucket --key corestack_finops_readonly_028811834831.json --acl public-read
-        
